@@ -102,14 +102,14 @@ If the plugin is installed, use both together; if not, this file applies on its 
 - Write the reproduction as a **failing test** (unit/integration, for UI an E2E test via `webapp-testing`):
 
 ```ts
-// lib/__tests__/application-status.test.ts
+// lib/__tests__/order-editing.test.ts
 import { describe, expect, it } from "vitest";
-import { canEditApplication } from "@/lib/applications";
+import { canEditOrder } from "@/lib/orders";
 
-describe("canEditApplication", () => {
-  it("the owner must not edit an application that has already been reviewed", () => {
-    const application = { applicantId: "u1", status: "approved" as const };
-    expect(canEditApplication(application, { id: "u1", role: "user" })).toBe(false);
+describe("canEditOrder", () => {
+  it("the customer must not edit an order that has already shipped", () => {
+    const order = { customerId: "u1", status: "shipped" as const };
+    expect(canEditOrder(order, { id: "u1", role: "customer" })).toBe(false);
   });
 });
 ```
@@ -123,7 +123,7 @@ describe("canEditApplication", () => {
 - Add **targeted, temporary** logging at component boundaries (function input/output, request/response, SQL query):
 
 ```ts
-console.debug("[DEBUG:apply-status]", { applicationId, status: application.status, role: user.role });
+console.debug("[DEBUG:order-edit]", { orderId, status: order.status, role: user.role });
 ```
 
 - For regressions, use `git bisect` with the test from step 1:
@@ -132,7 +132,7 @@ console.debug("[DEBUG:apply-status]", { applicationId, status: application.statu
 git bisect start
 git bisect bad HEAD
 git bisect good v1.4.0
-git bisect run npx vitest run lib/__tests__/application-status.test.ts
+git bisect run npx vitest run lib/__tests__/order-editing.test.ts
 git bisect reset
 ```
 
@@ -198,11 +198,11 @@ either return a defined error response or rethrow the error (`throw new Error("�
 ```markdown
 ## Fix: <short name of the bug>
 
-**Reproduction:** lib/__tests__/application-status.test.ts — "the owner must not edit a reviewed application" (failed: expected false, received true)
-**Root cause:** `canEditApplication` checked only ownership, not the `pending` status (lib/applications.ts:18)
-**Fix:** added the `application.status === "pending"` condition; the `updateApplication` server action uses the same function
+**Reproduction:** lib/__tests__/order-editing.test.ts — "the customer must not edit an order that has already shipped" (failed: expected false, received true)
+**Root cause:** `canEditOrder` checked only ownership, not the `pending` status (lib/orders.ts:18)
+**Fix:** added the `order.status === "pending"` condition; the `updateOrder` server action uses the same function
 **Verification:** vitest 48/48 ✅ · playwright 12/12 ✅ · tsc ✅ · lint ✅
-**Risk / impact:** applications in the `needs_info` state now also cannot be edited — confirmed against the requirements
+**Risk / impact:** orders in the `on_hold` state now also cannot be edited — confirmed against the requirements
 ```
 
 ## The three-attempts rule

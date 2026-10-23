@@ -98,7 +98,7 @@ obsahují zdroj, autora, licenci, přesný postup instalace, JSON konfiguraci a 
 | Skill / nástroj | Typ | Původní autor · licence | Manuální instalace | Kdy použít (triggers) |
 |-----------------|-----|-------------------------|--------------------|-----------------------|
 | [`ux-laws`](skills/ux-laws/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT (inspirováno *Laws of UX*, Jon Yablonski) | `cp -R skills/ux-laws .claude/skills/` | Návrh nebo review UI, formuláře, navigace, onboarding, „UX audit“, nízká konverze |
-| [`backend-security-auditor`](skills/backend-security-auditor/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/backend-security-auditor .claude/skills/` | API endpoint, server action, Discord OAuth, admin cesty, přihlášky, tickety, fórum, upload, webhook, „je to bezpečné?“ |
+| [`backend-security-auditor`](skills/backend-security-auditor/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/backend-security-auditor .claude/skills/` | API endpoint, server action, přihlášení přes OAuth/OIDC, hesla, session, admin cesty, obsah od uživatelů, upload, webhook, „je to bezpečné?“ |
 | [`frontend-design-guide`](skills/frontend-design-guide/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/frontend-design-guide .claude/skills/` | Nová stránka/komponenta, „udělej to hezčí“, fonty, barvy, skeleton, empty state |
 | [`webapp-testing`](skills/webapp-testing/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/webapp-testing .claude/skills/` | „Otestuj formulář“, E2E testy, validace, chybové hlášky, přesměrování po odeslání |
 | [`ux-writing-en`](skills/ux-writing-en/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/ux-writing-en .claude/skills/` | Jakýkoli anglický text pro uživatele: tlačítka, chyby, empty states, landing page, onboarding, e-maily |
@@ -287,7 +287,7 @@ name: backend-security-auditor
 description: "Strict security audit and rules for full-stack backends ... Use whenever you write or review an API endpoint ..."
 triggers:
   - "API endpoint / route handler / server action"
-  - "Discord sign-in / OAuth2 / session / cookies"
+  - "sign-in / OAuth2 / OpenID Connect / session / cookies / passwords"
 metadata:
   author: claude-web-skills-toolkit
   license: MIT

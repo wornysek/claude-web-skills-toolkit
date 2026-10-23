@@ -140,17 +140,17 @@ for i in $(seq 1 60); do curl -fsS -o /dev/null http://localhost:3000 && break; 
 ## Output format
 
 ```markdown
-## Runtime debugging: http://localhost:3000/whitelist/apply
+## Runtime debugging: http://localhost:3000/pricing
 
 **Found:**
-1. ❌ Console error: `TypeError: Cannot read properties of undefined (reading 'map')` — components/rules-list.tsx:14
-2. ❌ Network: `GET /api/rules` → 500 (Prisma: unknown field `order`)
+1. ❌ Console error: `TypeError: Cannot read properties of undefined (reading 'map')` — components/plan-list.tsx:14
+2. ❌ Network: `GET /api/plans` → 500 (Prisma: unknown field `order`)
 
-**Cause:** a migration renamed the `order` column to `position`; the query in app/api/rules/route.ts:9 uses the old name.
+**Cause:** a migration renamed the `order` column to `position`; the query in app/api/plans/route.ts:9 uses the old name.
 
 **Fix:** `orderBy: { position: "asc" }` + a type-safe `select`.
 
-**Verification:** reload → 0 console errors, `GET /api/rules` → 200, rules list rendered (snapshot).
+**Verification:** reload → 0 console errors, `GET /api/plans` → 200, plan list rendered (snapshot).
 ```
 
 ## Related skills

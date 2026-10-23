@@ -95,7 +95,7 @@ tool itself (plugin, MCP server) is installed with `install.sh` or manually.
 | Skill / tool | Type | Original author · license | Manual installation | When to use (triggers) |
 |--------------|------|---------------------------|---------------------|------------------------|
 | [`ux-laws`](skills/ux-laws/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT (inspired by *Laws of UX*, Jon Yablonski) | `cp -R skills/ux-laws .claude/skills/` | UI design or review, forms, navigation, onboarding, "UX audit", low conversion |
-| [`backend-security-auditor`](skills/backend-security-auditor/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/backend-security-auditor .claude/skills/` | API endpoint, server action, Discord OAuth, admin routes, applications, tickets, forum, upload, webhook, "is this secure?" |
+| [`backend-security-auditor`](skills/backend-security-auditor/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/backend-security-auditor .claude/skills/` | API endpoint, server action, OAuth/OIDC sign-in, passwords, sessions, admin routes, user-generated content, upload, webhook, "is this secure?" |
 | [`frontend-design-guide`](skills/frontend-design-guide/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/frontend-design-guide .claude/skills/` | New page/component, "make it look better", fonts, colors, skeleton, empty state |
 | [`webapp-testing`](skills/webapp-testing/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/webapp-testing .claude/skills/` | "Test the form", E2E tests, validation, error messages, redirect after submission |
 | [`ux-writing-en`](skills/ux-writing-en/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/ux-writing-en .claude/skills/` | Any English user-facing text: buttons, errors, empty states, landing page, onboarding, emails |
@@ -288,7 +288,7 @@ name: backend-security-auditor
 description: "Strict security audit and rules for full-stack backends ... Use whenever you write or review an API endpoint ..."
 triggers:
   - "API endpoint / route handler / server action"
-  - "Discord sign-in / OAuth2 / session / cookies"
+  - "sign-in / OAuth2 / OpenID Connect / session / cookies / passwords"
 metadata:
   author: claude-web-skills-toolkit
   license: MIT

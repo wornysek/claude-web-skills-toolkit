@@ -176,7 +176,7 @@ export function Hero() {
       <div className="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-24 sm:px-6 md:py-32 lg:px-8">
         {/* LCP element: rendered immediately, no intro animation */}
         <h1 className="font-display max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
-          A community where people play fair
+          Invoicing for freelancers
         </h1>
 
         <motion.p
@@ -185,7 +185,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
         >
-          Apply for the whitelist and we'll get back to you within 48 hours.
+          Send an invoice in a minute. Payment reminders go out automatically.
         </motion.p>
 
         <motion.div
@@ -194,8 +194,8 @@ export function Hero() {
           transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
         >
           <Button asChild size="lg" className="group">
-            <Link href="/whitelist/apply">
-              Apply now
+            <Link href="/signup">
+              Start free trial
               <ArrowRight className="transition-transform motion-safe:group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
           </Button>
@@ -224,7 +224,7 @@ export function Hero() {
   size="lg"
   className="bg-[linear-gradient(110deg,var(--primary),45%,color-mix(in_oklch,var(--primary),white_25%),55%,var(--primary))] bg-[length:200%_100%] motion-safe:animate-shimmer"
 >
-  Apply now
+  Start free trial
 </Button>
 ```
 

@@ -46,7 +46,7 @@ aesthetic direction; this file covers **concrete implementation standards** and 
 | Technical, developer tool | Geist, IBM Plex Sans | Geist Mono, JetBrains Mono |
 | Modern SaaS, clean | Manrope, Plus Jakarta Sans | General Sans, Satoshi |
 | Editorial, premium | Source Serif 4, Newsreader | Fraunces, Instrument Serif |
-| Gaming community, energetic | Sora, Outfit | Space Grotesk, Clash Display |
+| Gaming, entertainment, energetic | Sora, Outfit | Space Grotesk, Clash Display |
 | Friendly, consumer | DM Sans, Nunito Sans | Bricolage Grotesque |
 
 - Load fonts via `next/font` (self-hosting, no layout shift, `display: "swap"`), not via a `<link>` to Google Fonts.
@@ -241,7 +241,7 @@ Distinguish three situations — each has a different text and a different actio
 |-----------|---------|--------|
 | No data yet | "You don't have any tickets yet" | "Create a ticket" (primary) |
 | No results for the filter | "Nothing matches the "open" filter" | "Clear filters" |
-| No permission / unavailable | "This section is for whitelist members only" | "Apply" |
+| No permission / unavailable | "Only workspace admins can see billing" | "Request access" |
 
 ```tsx
 // components/empty-state.tsx

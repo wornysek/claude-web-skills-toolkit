@@ -87,7 +87,7 @@ https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/comm
 declaring the work done. The audit has two parts:
 
 ### Part 1 — Vercel Web Interface Guidelines
-1. Invoke the `web-design-guidelines` skill on the changed files (e.g. `app/whitelist/apply/**/*.tsx`).
+1. Invoke the `web-design-guidelines` skill on the changed files (e.g. `app/signup/**/*.tsx`).
 2. The skill loads the current rules and lists findings in the `file:line` format.
 3. Do not evaluate findings selectively — fix all of those that concern the changed code.
 
@@ -125,20 +125,20 @@ alternatively run an `@axe-core/playwright` test (the `webapp-testing` skill).
 ## Output format
 
 ```markdown
-## Design audit: app/whitelist/apply
+## Design audit: app/signup
 
 ### Web Interface Guidelines
-app/whitelist/apply/form.tsx:42 - input without an `autocomplete` attribute
-app/whitelist/apply/form.tsx:88 - button has no visible focus state
+app/signup/form.tsx:42 - input without an `autocomplete` attribute
+app/signup/form.tsx:88 - button has no visible focus state
 
 ### Spacing
-components/apply-card.tsx:12 - `mt-[13px]` off the scale → `mt-3`
+components/plan-card.tsx:12 - `mt-[13px]` off the scale → `mt-3`
 
 ### Grid alignment
-app/whitelist/apply/page.tsx:20 - section without the shared container (24px vs. 32px inset)
+app/signup/page.tsx:20 - section without the shared container (24px vs. 32px inset)
 
 ### Contrast
-app/whitelist/apply/page.tsx:31 - `text-muted-foreground` on `bg-muted` = 3.9 : 1 (< 4.5 : 1) in dark mode
+app/signup/page.tsx:31 - `text-muted-foreground` on `bg-muted` = 3.9 : 1 (< 4.5 : 1) in dark mode
 
 **Fixed:** 5/5 · **Remaining:** 0
 ```

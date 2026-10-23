@@ -5,7 +5,7 @@ triggers:
   - "design a UI / page / screen"
   - "UX review / UX audit"
   - "improve usability / conversion"
-  - "form, sign-up, onboarding, checkout, application"
+  - "form, sign-up, onboarding, checkout, booking"
   - "navigation, menu, dashboard, landing page"
   - "why don't users finish ..."
   - "review my UI / improve UX / usability"
@@ -118,7 +118,7 @@ of menu items, but a reason to **group (chunk)** information into meaningful uni
 - [ ] The user does not have to remember anything between steps — a summary of previous steps is visible.
 - [ ] Tables with many columns show the most important columns by default and allow adding more.
 
-**Anti-pattern:** 25 application fields in a single unstructured column.
+**Anti-pattern:** 25 sign-up fields in a single unstructured column.
 
 ---
 
@@ -213,7 +213,7 @@ request. This reduces cognitive load without limiting experts.
 - [ ] Onboarding explains features in the context of first use, not with 10 slides upfront.
 - [ ] Hidden content is still reachable by keyboard and screen reader (`aria-expanded`, `aria-controls`).
 
-**Anti-pattern:** An application form that immediately shows fields intended only for admins.
+**Anti-pattern:** A settings form that immediately shows options only admins ever need.
 
 ---
 
@@ -228,7 +228,7 @@ options, history and context instead of demanding them from the user.
 - [ ] Breadcrumb navigation (`Breadcrumb`) on pages deeper than 2 levels.
 - [ ] The active navigation item is visually marked (`aria-current="page"`).
 - [ ] Icons without labels only for universally known symbols (close, search); others have text or a tooltip.
-- [ ] Forms show examples of the correct format ("e.g. Steve_123") as a hint below the field.
+- [ ] Forms show examples of the correct format ("e.g. acme-studio") as a hint below the field.
 
 **Anti-pattern:** "Enter the category ID" instead of choosing from a list of categories.
 
@@ -255,12 +255,12 @@ Use this for the most important thing — and only for that.
 not by the average. Design the peaks and the ending of a flow deliberately.
 
 **Implementation Check:**
-- [ ] A successful completion (submitting an application, creating a ticket) is followed by a **well-crafted confirmation screen**: what happened, what comes next, when, a link to the status.
+- [ ] A successful completion (placing an order, creating a ticket) is followed by a **well-crafted confirmation screen**: what happened, what comes next, when, a link to the status.
 - [ ] Error states are humane: they explain the problem and what to do about it, and never lose the user's data.
 - [ ] The most frustrating step of the flow (waiting, payment, upload) is identified and gets extra care (progress, reassurance).
 - [ ] The end of the flow offers a meaningful next step, not a dead end.
 
-**Anti-pattern:** After submitting an application, the form is simply cleared without any confirmation.
+**Anti-pattern:** After placing an order, the form is simply cleared without any confirmation.
 
 ---
 
@@ -272,7 +272,7 @@ progress and give the feeling that "part of the way is already behind them".
 **Implementation Check:**
 - [ ] A multi-step form has a "Step 2 of 3" indicator or a progress bar with `aria-valuenow`.
 - [ ] The number of steps is known upfront and does not grow along the way.
-- [ ] Already completed parts count towards progress (e.g. a profile prefilled from Discord = step 1 done).
+- [ ] Already completed parts count towards progress (e.g. a profile prefilled from the sign-in provider = step 1 done).
 - [ ] Work in progress is saved (draft), so coming back does not start from zero.
 
 **Anti-pattern:** A wizard with no indication of length — the user does not know whether they are near the end or at the beginning.
@@ -290,7 +290,7 @@ The most important choices belong at the beginning and the end.
 - [ ] In lists of benefits/features, the strongest argument is first and the second strongest is last.
 - [ ] Less important items are in the middle, never the key action.
 
-**Anti-pattern:** "Apply" as the fourth of eight navigation items.
+**Anti-pattern:** "Pricing" as the fourth of eight navigation items.
 
 ---
 
@@ -301,11 +301,11 @@ question is who carries it — the user or the system. Move it to the system.
 
 **Implementation Check:**
 - [ ] Sensible defaults (time zone from the browser, language from `Accept-Language`, country from locale).
-- [ ] Data the system already knows (Discord name, avatar, email from OAuth) is prefilled and not requested again.
+- [ ] Data the system already knows (name, avatar and email from the OAuth sign-in) is prefilled and not requested again.
 - [ ] Automatic input formatting (spaces in a phone number, uppercase in a code) instead of error messages.
 - [ ] The system validates and explains; it does not throw an error without context.
 
-**Anti-pattern:** The user has to type in their Discord ID manually, even though they just signed in with Discord.
+**Anti-pattern:** The user has to type their email again, even though they just signed in with Google.
 
 ---
 
@@ -336,7 +336,7 @@ must justify its place; whatever does not support the goal of the screen, remove
 - [ ] No decorative elements that compete with content (unnecessary illustrations, carousel, autoplay video).
 - [ ] Components are not oversized: a tooltip on a tooltip, a modal in a modal = wrong.
 
-**Anti-pattern:** "Fax" and "Middle name" fields in an application to join a gaming community.
+**Anti-pattern:** "Fax" and "Middle name" fields in a newsletter sign-up.
 
 ---
 
@@ -366,9 +366,9 @@ When reviewing, list the findings sorted by severity:
 
 | # | Severity | Law | Finding | File:line | Fix |
 |---|----------|-----|---------|-----------|-----|
-| 1 | 🔴 Critical | Feedback Loops | Submit button has no loading state, double submission happens | app/apply/form.tsx:84 | `disabled={isPending}` + spinner |
+| 1 | 🔴 Critical | Feedback Loops | Submit button has no loading state, double submission happens | app/signup/form.tsx:84 | `disabled={isPending}` + spinner |
 | 2 | 🟠 High | Fitts | 16×16 px close icon | components/modal.tsx:22 | `size="icon"` (40×40) + `aria-label` |
-| 3 | 🟡 Medium | Proximity | Same spacing inside and between sections | app/apply/form.tsx:30 | `space-y-2` inside, `space-y-8` between |
+| 3 | 🟡 Medium | Proximity | Same spacing inside and between sections | app/signup/form.tsx:30 | `space-y-2` inside, `space-y-8` between |
 
 **Passed:** Hick, Jakob, Miller, Postel, ...
 **Deliberate exceptions:** <law> — <justification>
