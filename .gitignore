@@ -45,9 +45,12 @@ CLAUDE.local.md
 .claude.json
 .claude.json.backup
 
-# Skill copies created by ./install.sh --skills when testing
-# directly in this repository (the source of truth is the skills/ folder).
+# Copies created by ./install.sh --skills / --hooks when testing directly in this
+# repository (the source of truth is the skills/ and hooks/ folders).
 /.claude/skills/
+/.claude/hooks/
+# Backup written by ./install.sh --hooks before merging settings
+.claude/settings.json.bak
 
 # --- Node.js -----------------------------------------------------------------
 node_modules/

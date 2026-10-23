@@ -22,7 +22,7 @@ metadata:
 | | |
 |---|---|
 | **Author / Source** | [Vercel Labs](https://github.com/vercel-labs/agent-skills) — `vercel-labs/agent-skills` |
-| **Upstream skill** | `web-design-guidelines` (+ recommended `react-best-practices`) |
+| **Upstream skill** | `web-design-guidelines` (+ recommended `react-best-practices` and `writing-guidelines`) |
 | **Rules** | [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines) |
 | **License** | MIT · this wrapper skill: MIT |
 | **Type** | External agent skill (installed via the `skills` CLI, no MCP server) |
@@ -38,8 +38,11 @@ npx skills add vercel-labs/agent-skills
 Non-interactively, only the recommended skills for Claude Code (same as `./install.sh --vercel --yes`):
 
 ```bash
-npx skills add vercel-labs/agent-skills --skill web-design-guidelines react-best-practices --agent claude-code --yes
+npx skills add vercel-labs/agent-skills --skill web-design-guidelines react-best-practices writing-guidelines --agent claude-code --yes
 ```
+
+`writing-guidelines` reviews documentation prose against Vercel's writing handbook; the
+toolkit's `deslop-en` skill uses it for long-form docs.
 
 Other useful `skills` CLI options: `--list` (lists available skills), `--global` (installs
 into the user directory instead of the project), `--copy` (copies instead of symlinking).
@@ -50,7 +53,9 @@ After installation the skills are in the project's `.claude/skills/`:
 .claude/skills/
 ├── web-design-guidelines/
 │   └── SKILL.md
-└── react-best-practices/
+├── react-best-practices/
+│   └── SKILL.md
+└── writing-guidelines/
     └── SKILL.md
 ```
 

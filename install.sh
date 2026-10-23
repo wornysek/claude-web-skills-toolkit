@@ -31,7 +31,7 @@ readonly PROJECT_DIR="${PWD}"
 readonly MAGIC_MCP_NAME="21st"
 readonly MAGIC_MCP_URL="https://21st.dev/api/mcp"
 readonly VERCEL_SKILLS_REPO="vercel-labs/agent-skills"
-readonly VERCEL_DEFAULT_SKILLS="web-design-guidelines react-best-practices"
+readonly VERCEL_DEFAULT_SKILLS="web-design-guidelines react-best-practices writing-guidelines"
 
 # --- Options -----------------------------------------------------------------
 DO_PLUGINS=0
@@ -40,6 +40,7 @@ DO_SHADCN=0
 DO_VERCEL=0
 DO_MAGIC=0
 DO_SKILLS=0
+DO_HOOKS=0
 SKILLS_GLOBAL=0
 FORCE=0
 DRY_RUN=0
@@ -91,9 +92,9 @@ run() {
   "$@"
 }
 
-# Same as run(), but prints the given masked description instead of the arguments.
+# Same as run(), but prints the given description instead of the arguments.
 # Used for commands that contain secret values (API keys), so they never show up
-# in the output or in a CI log.
+# in the output or in a CI log, and for long inline scripts.
 run_secret() {
   local display="$1"
   shift
@@ -168,6 +169,7 @@ ${C_BOLD}COMPONENTS${C_RESET}
   --magic           21st.dev MCP (needs an API key in API_KEY_21ST or entered at the prompt)
   --mcp             Shortcut for --chrome --shadcn --magic
   --skills          Copy the markdown skills into ./.claude/skills
+  --hooks           Slop & secrets guard hook (./.claude/hooks + ./.claude/settings.json)
 
 ${C_BOLD}MODIFIERS${C_RESET}
   --global          Copy skills into ~/.claude/skills instead of ./.claude/skills
@@ -202,7 +204,7 @@ parse_args() {
   while (( $# > 0 )); do
     case "$1" in
       --all)
-        DO_PLUGINS=1; DO_CHROME=1; DO_SHADCN=1; DO_VERCEL=1; DO_MAGIC=1; DO_SKILLS=1
+        DO_PLUGINS=1; DO_CHROME=1; DO_SHADCN=1; DO_VERCEL=1; DO_MAGIC=1; DO_SKILLS=1; DO_HOOKS=1
         ASSUME_YES=1
         ;;
       --plugins) DO_PLUGINS=1 ;;
@@ -212,6 +214,7 @@ parse_args() {
       --magic)   DO_MAGIC=1 ;;
       --mcp)     DO_CHROME=1; DO_SHADCN=1; DO_MAGIC=1 ;;
       --skills)  DO_SKILLS=1 ;;
+      --hooks)   DO_HOOKS=1 ;;
       --global)  SKILLS_GLOBAL=1 ;;
       --force)   FORCE=1 ;;
       -y|--yes)  ASSUME_YES=1 ;;
@@ -235,7 +238,7 @@ parse_args() {
   done
 
   # Modifiers alone (e.g. just --dry-run) without a component => interactive menu.
-  if (( DO_PLUGINS + DO_CHROME + DO_SHADCN + DO_VERCEL + DO_MAGIC + DO_SKILLS == 0 )); then
+  if (( DO_PLUGINS + DO_CHROME + DO_SHADCN + DO_VERCEL + DO_MAGIC + DO_SKILLS + DO_HOOKS == 0 )); then
     INTERACTIVE=1
   fi
 }
@@ -257,9 +260,10 @@ interactive_menu() {
   1) Official plugins         frontend-design, superpowers (Anthropic marketplace)
   2) MCP: chrome-devtools     runtime debugging in Chrome (Google Chrome DevTools)
   3) MCP: shadcn              shadcn/ui component registry (.mcp.json in the project)
-  4) Vercel agent skills      web-design-guidelines, react-best-practices
+  4) Vercel agent skills      web-design-guidelines, react-best-practices, writing-guidelines
   5) MCP: 21st.dev            interactive UI components and animations (API key)
   6) Markdown skills          copy skills/* into ./.claude/skills
+  7) Hook: guard              blocks secrets, flags AI writing tells (.claude/settings.json)
   a) All
   q) Quit
 EOF
@@ -277,13 +281,14 @@ EOF
       4) DO_VERCEL=1 ;;
       5) DO_MAGIC=1 ;;
       6) DO_SKILLS=1 ;;
-      a|A) DO_PLUGINS=1; DO_CHROME=1; DO_SHADCN=1; DO_VERCEL=1; DO_MAGIC=1; DO_SKILLS=1 ;;
+      7) DO_HOOKS=1 ;;
+      a|A) DO_PLUGINS=1; DO_CHROME=1; DO_SHADCN=1; DO_VERCEL=1; DO_MAGIC=1; DO_SKILLS=1; DO_HOOKS=1 ;;
       q|Q) info "Exited without changes."; exit 0 ;;
       *) warn "Unknown choice '${token}' — ignoring." ;;
     esac
   done
 
-  if (( DO_PLUGINS + DO_CHROME + DO_SHADCN + DO_VERCEL + DO_MAGIC + DO_SKILLS == 0 )); then
+  if (( DO_PLUGINS + DO_CHROME + DO_SHADCN + DO_VERCEL + DO_MAGIC + DO_SKILLS + DO_HOOKS == 0 )); then
     info "Nothing selected, exiting."
     exit 0
   fi
@@ -646,6 +651,121 @@ copy_skills() {
 }
 
 # =============================================================================
+#  7) Hook: slop & secrets guard
+# =============================================================================
+
+# Adds the guard to an existing .claude/settings.json without touching other settings.
+# Tries node, then python; returns 1 if neither is available or the file isn't valid JSON.
+merge_hook_settings() {
+  local settings="$1"
+  local node_merge='
+const fs = require("fs");
+const file = process.argv[1];
+const settings = JSON.parse(fs.readFileSync(file, "utf8"));
+settings.hooks = settings.hooks || {};
+for (const [event, mode] of [["PreToolUse", "secrets"], ["PostToolUse", "slop"]]) {
+  const list = (settings.hooks[event] = settings.hooks[event] || []);
+  if (JSON.stringify(list).includes("slop-secrets-guard.sh")) continue;
+  list.push({
+    matcher: "Write|Edit|MultiEdit",
+    hooks: [{ type: "command", command: `bash "$CLAUDE_PROJECT_DIR/.claude/hooks/slop-secrets-guard.sh" ${mode}`, timeout: 15 }],
+  });
+}
+fs.writeFileSync(file, JSON.stringify(settings, null, 2) + "\n");
+'
+  local python_merge='
+import json, sys
+path = sys.argv[1]
+with open(path, encoding="utf-8") as f:
+    settings = json.load(f)
+hooks = settings.setdefault("hooks", {})
+for event, mode in (("PreToolUse", "secrets"), ("PostToolUse", "slop")):
+    entries = hooks.setdefault(event, [])
+    if "slop-secrets-guard.sh" in json.dumps(entries):
+        continue
+    entries.append({
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [{"type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/slop-secrets-guard.sh\" " + mode, "timeout": 15}],
+    })
+with open(path, "w", encoding="utf-8", newline="\n") as f:
+    json.dump(settings, f, indent=2, ensure_ascii=False)
+    f.write("\n")
+'
+  if has_cmd node; then
+    run_secret "node -e <merge hook config> ${settings}" node -e "${node_merge}" "${settings}" && return 0
+    return 1
+  fi
+  local py
+  for py in python3 python; do
+    if has_cmd "${py}" && "${py}" -c "import json" >/dev/null 2>&1; then
+      run_secret "${py} -c <merge hook config> ${settings}" "${py}" -c "${python_merge}" "${settings}" && return 0
+      return 1
+    fi
+  done
+  return 1
+}
+
+install_hooks() {
+  section "7) Hook: slop & secrets guard"
+
+  local src="${SCRIPT_DIR}/hooks/slop-secrets-guard.sh"
+  local example="${SCRIPT_DIR}/hooks/settings.example.json"
+  local hooks_dir="${PROJECT_DIR}/.claude/hooks"
+  local dest="${hooks_dir}/slop-secrets-guard.sh"
+  local settings="${PROJECT_DIR}/.claude/settings.json"
+
+  if [[ ! -f "${src}" || ! -f "${example}" ]]; then
+    err "Hook files not found in ${SCRIPT_DIR}/hooks."
+    mark_fail "Hook (files missing)"
+    return 0
+  fi
+
+  # 1. The script itself (owned by the toolkit, refreshed when it changed).
+  if [[ -f "${dest}" ]] && cmp -s "${src}" "${dest}"; then
+    ok "Hook script is up to date: ${dest}"
+  elif [[ -f "${dest}" ]] && ! (( FORCE )) && ! confirm "A different ${dest} exists. Overwrite it?"; then
+    warn "Keeping the existing hook script (use --force to overwrite)."
+  else
+    if (( ! DRY_RUN )); then mkdir -p -- "${hooks_dir}"; fi
+    if ! run cp -- "${src}" "${dest}"; then
+      err "Copying the hook script failed."
+      mark_fail "Hook (copy failed)"
+      return 0
+    fi
+    if (( ! DRY_RUN )); then chmod +x "${dest}" 2>/dev/null || true; fi
+    ok "Hook script installed: ${dest}"
+  fi
+
+  # 2. Registration in .claude/settings.json.
+  if [[ -f "${settings}" ]] && grep -qF 'slop-secrets-guard.sh' "${settings}"; then
+    ok "Hook is already registered in ${settings}."
+    mark_skip "Hook (already registered)"
+    return 0
+  fi
+
+  if [[ ! -f "${settings}" ]]; then
+    if run cp -- "${example}" "${settings}"; then
+      ok "Created ${settings} with the hook configuration."
+      mark_ok "Hook: slop & secrets guard"
+    else
+      err "Writing ${settings} failed."
+      mark_fail "Hook (settings not written)"
+    fi
+    return 0
+  fi
+
+  if (( ! DRY_RUN )); then cp -- "${settings}" "${settings}.bak"; fi
+  if merge_hook_settings "${settings}"; then
+    ok "Hook registered in ${settings} (backup: settings.json.bak)."
+    mark_ok "Hook: slop & secrets guard"
+  else
+    warn "Could not merge ${settings} automatically (needs node or python, and valid JSON)."
+    warn "Add the \"hooks\" block from ${example} to it by hand."
+    mark_fail "Hook (manual merge needed)"
+  fi
+}
+
+# =============================================================================
 #  Summary
 # =============================================================================
 
@@ -699,6 +819,7 @@ main() {
   if (( DO_VERCEL ));  then install_vercel_skills;   fi
   if (( DO_MAGIC ));   then install_magic;           fi
   if (( DO_SKILLS ));  then copy_skills;             fi
+  if (( DO_HOOKS ));   then install_hooks;           fi
 
   if print_summary; then
     printf '\n'
