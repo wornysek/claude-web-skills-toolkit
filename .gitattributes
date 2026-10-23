@@ -1,0 +1,5 @@
+# Shell scripts must keep LF line endings even when checked out on Windows,
+# otherwise Bash fails with "$'\r': command not found".
+* text=auto
+*.sh text eol=lf
+*.md text eol=lf
