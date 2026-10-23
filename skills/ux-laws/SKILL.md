@@ -6,7 +6,7 @@ triggers:
   - "UX review / UX audit"
   - "improve usability / conversion"
   - "form, sign-up, onboarding, checkout, booking"
-  - "navigation, menu, dashboard, landing page"
+  - "navigation, menu, dashboard"
   - "why don't users finish ..."
   - "review my UI / improve UX / usability"
 metadata:
@@ -79,7 +79,7 @@ choices to what is actually needed at the given step.
 Important and frequent targets must be large and close to where the attention/cursor/thumb is.
 
 **Implementation Check:**
-- [ ] Touch targets are at least **44×44 px** (`min-h-11 min-w-11`); the absolute minimum per WCAG 2.5.8 is 24×24 px.
+- [ ] Touch targets follow the sizes in `a11y-auditor` (section 10); primary touch controls use the recommended larger size (`min-h-11 min-w-11`).
 - [ ] There is at least 8 px (`gap-2`) between adjacent clickable elements to prevent misclicks.
 - [ ] On mobile, the primary CTA is within thumb reach (lower half of the screen, or a sticky bottom bar).
 - [ ] The whole row/card is clickable, not just a small link text inside it.
@@ -133,7 +133,7 @@ result takes longer, the progress must be visible.
 - [ ] Operations longer than 400 ms show a loading state (spinner in the button, content skeleton, progress bar).
 - [ ] The skeleton appears only after a ~150–200 ms delay so that fast responses don't flicker.
 - [ ] Optimistic UI for cheap and reversible actions (like, toggle, moving a card) with rollback on error.
-- [ ] Core Web Vitals: **INP < 200 ms**, LCP < 2.5 s, CLS < 0.1 (verify with Lighthouse or the Chrome DevTools MCP).
+- [ ] Core Web Vitals meet the targets in `web-performance` (check field data, Lighthouse or the Chrome DevTools MCP).
 - [ ] Heavy computation off the main thread (Web Worker) and debounced search (200–300 ms).
 
 **Anti-pattern:** A "Submit" button that does nothing visible for 2 seconds, so the user clicks again.

@@ -337,7 +337,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 ```
 
-- `<html lang>` matches the page, every language version links all others (`hreflang`) plus `x-default`, the sitemap lists every language URL. Details: `seo-metadata`.
+- `<html lang>` matches the page language. `hreflang`, `x-default`, canonicals and the multilingual sitemap follow `seo-metadata` section 6 — the code above only computes the localized URLs.
 - OG images and social texts are localized too.
 
 ## 9. Validation, API errors and server messages
@@ -452,7 +452,7 @@ The rules in sections 1 and 4–11 apply to all of them.
 - [ ] Messages use ICU with named placeholders; plurals have every category the language needs; no concatenation.
 - [ ] Dates, numbers, currencies and sorting go through `Intl` / the library formatter; timestamps stored in UTC.
 - [ ] The language switcher shows native language names, keeps the current page and has no flags.
-- [ ] `<html lang>` (and `dir`) are set; metadata, OG images, hreflang and the sitemap are per locale.
+- [ ] `<html lang>` (and `dir`) are set; metadata and OG images are per locale; hreflang and the sitemap follow `seo-metadata`.
 - [ ] APIs return error codes; validation messages are translated in the UI.
 - [ ] Emails and notifications use the recipient's stored locale.
 - [ ] Logical CSS properties are used (RTL-ready).

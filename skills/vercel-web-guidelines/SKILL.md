@@ -113,14 +113,14 @@ grep -rnE '\b-?(m|p|gap|space-[xy]|inset|top|left|right|bottom)[trblxy]?-\[[0-9.
 - [ ] No horizontal scrolling at a width of 360 px.
 
 #### 2c. Color contrast
-- [ ] Text ≥ 4.5 : 1, large text ≥ 3 : 1, UI element boundaries and meaningful icons ≥ 3 : 1 (WCAG 2.2 AA).
+- [ ] Contrast meets the thresholds in `a11y-auditor` section 7 (text, large text, UI boundaries and meaningful icons).
 - [ ] Verified in **both light and dark** mode, including the `hover`, `disabled` and `placeholder` states.
 - [ ] Text over an image or gradient has sufficient contrast at its worst point (overlay `bg-black/50`).
 - [ ] Information is not conveyed by color alone.
 
 Verifying contrast in the browser (requires the `chrome-devtools` skill): open the page,
 run `take_snapshot`, and for disputed elements read the computed colors via `evaluate_script`;
-alternatively run an `@axe-core/playwright` test (the `webapp-testing` skill).
+alternatively run the axe scan from `a11y-auditor` (Testing section).
 
 ## Output format
 

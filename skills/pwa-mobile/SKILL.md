@@ -49,7 +49,7 @@ designed for that first; a PWA adds installability, offline use and notification
 
 ## 2. Touch and pointer
 
-- Touch targets ≥ 44 × 44 px with spacing (`ux-laws` Fitts, `a11y-auditor` 2.5.8).
+- Touch targets follow `a11y-auditor` section 10 — the recommended size for primary touch controls, with spacing (`ux-laws` Fitts).
 - **No hover-only interactions:** menus, tooltips and previews also open on tap and focus; use `@media (hover: hover)` for hover-only decoration.
 - **Gestures have visible alternatives:** swipe-to-delete also has a delete button; carousels have buttons (`a11y-auditor` 2.5.1, 2.5.7).
 - `touch-action` and `overscroll-behavior: contain` for custom scrolling areas, maps and drawers (prevents accidental pull-to-refresh and page scroll).
@@ -180,7 +180,7 @@ await fetch("/api/push/subscriptions", { method: "POST", body: JSON.stringify(su
 ## Checklist
 
 - [ ] Mobile-first layout; container queries where components move; `dvh`/`svh`; safe areas; no horizontal scroll at 320 px.
-- [ ] Touch targets ≥ 44 px; no hover-only interactions; gestures have alternatives; press feedback.
+- [ ] Touch targets per `a11y-auditor`; no hover-only interactions; gestures have alternatives; press feedback.
 - [ ] Correct input types and `inputMode`; input font ≥ 16 px; fields visible above the keyboard.
 - [ ] Manifest with maskable icons and theme colors; install prompt after value, not on load.
 - [ ] Service worker with sensible strategies, offline fallback, controlled updates; no personalized data in shared caches.

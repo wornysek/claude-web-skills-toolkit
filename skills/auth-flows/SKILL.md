@@ -141,8 +141,8 @@ export function generateRecoveryCodes(count = 10) {
 
 **Reset:**
 1. "Forgot password?" → email field → always "If an account exists, we sent a link".
-2. The link (single-use, ≤ 1 hour, hashed in the DB) opens a page to set a new password.
-3. After the change: **revoke all other sessions**, email a notification ("Your password was changed — if it wasn't you, …").
+2. The link (token rules: `backend-security-auditor` A4) opens a page to set a new password.
+3. After the change: other sessions are revoked (A4) and the user gets a notification email ("Your password was changed — if it wasn't you, …").
 
 **Email change:**
 1. Confirm the **new** address with a link or code before switching.

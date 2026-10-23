@@ -115,7 +115,7 @@ export default function PasswordResetEmail({ name, resetUrl, locale = "en" }: { 
 
 ## 4. Accessibility, dark mode and links
 
-- `lang` on `<html>`, real headings, text at least 14–16 px, contrast 4.5 : 1, meaningful `alt` text; the email still makes sense with images blocked.
+- `lang` on `<html>`, real headings, text at least 14–16 px, contrast per `a11y-auditor`, meaningful `alt` text; the email still makes sense with images blocked.
 - **Dark mode:** avoid transparent PNG logos that disappear on dark backgrounds; test in clients that invert colors.
 - Buttons are links with descriptive text, plus the full URL as text for clients that break buttons.
 - **Absolute HTTPS links** to your own domain; no link shorteners; tracking redirects only through your own domain (and only with consent where required).

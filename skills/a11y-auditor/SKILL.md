@@ -111,6 +111,8 @@ tested library component.
 
 ## 7. Color and contrast
 
+The contrast thresholds below are the toolkit's single source; other skills refer to them.
+
 - Text **4.5 : 1**, large text (≥ 24 px, or ≥ 18.66 px bold) **3 : 1** (1.4.3).
 - UI components, focus indicators and meaningful graphics **3 : 1** against adjacent colors (1.4.11).
 - Never color alone (1.4.1) — add text, icons or patterns (status badges, form errors, chart series).
@@ -132,7 +134,7 @@ tested library component.
 
 ## 10. Pointer and touch
 
-- **Target size** at least **24 × 24 px** or enough spacing (2.5.8); 44 × 44 px for primary touch targets (`ux-laws`).
+- **Target size:** at least **24 × 24 CSS px** or enough spacing around smaller targets (SC 2.5.8, AA); **44 × 44 px recommended** for primary controls on touch devices (SC 2.5.5, AAA). Other skills refer to these numbers.
 - **Dragging** (sortable lists, sliders, maps) has a single-pointer alternative — buttons or inputs (2.5.7).
 - Multi-finger and path gestures have simple alternatives (2.5.1); actions fire on release, not on press (2.5.2).
 

@@ -88,7 +88,7 @@ Not every page needs every section — pick by how much convincing the visitor n
 
 ## 7. Technical quality
 
-- LCP target ≤ 2.0 s on mobile; hero image prioritized; no heavy third-party scripts above the fold (`web-performance`).
+- Meets the landing-page LCP target and budgets in `web-performance`; hero image prioritized; no heavy third-party scripts above the fold.
 - Accessible: headings in order, contrast, keyboard, reduced motion for animated sections (`a11y-auditor`).
 - Metadata and social image per page (`seo-metadata`); campaign variants that shouldn't rank are `noindex`.
 - Responsive and touch-friendly CTAs (`pwa-mobile`).

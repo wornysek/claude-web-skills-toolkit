@@ -208,6 +208,8 @@ export default function robots(): MetadataRoute.Robots {
 
 ## 6. Multilingual sites (hreflang)
 
+This section is the toolkit's single source for `hreflang` rules; `i18n-setup` covers routing and message files.
+
 - One URL per language (`/en/pricing`, `/cs/cenik`), never the same URL switching language by cookie or IP.
 - Every language version lists all versions, including itself, plus `x-default`:
 
@@ -280,7 +282,7 @@ export function JsonLd({ data }: { data: WithContext<Thing> }) {
 - **Semantic structure:** one `<h1>`, ordered headings, `<main>`, `<nav>`, `<article>`, real `<a href>` links (not `onClick` navigation).
 - **Descriptive link text** and internal links between related pages.
 - **Images:** meaningful `alt`, explicit `width`/`height` (or `next/image`), modern formats, lazy loading below the fold.
-- **Performance is part of SEO:** Core Web Vitals (LCP < 2.5 s, INP < 200 ms, CLS < 0.1) — see `web-performance`.
+- **Performance is part of SEO:** keep Core Web Vitals within the targets in `web-performance`.
 
 ## 9. URLs, status codes and redirects
 

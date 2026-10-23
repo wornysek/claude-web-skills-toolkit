@@ -335,23 +335,11 @@ test.describe("New ticket — signed-out user", () => {
 > Adapt the label names, messages and URLs in the reference test to the actual
 > implementation — read them from the component and the Zod schema, do not invent them.
 
-## Optional: automated accessibility check
+## Accessibility in the suite
 
-Automated checks find only part of the problems; the full audit is in `a11y-auditor`.
-
-```bash
-npm install --save-dev @axe-core/playwright
-```
-
-```ts
-import AxeBuilder from "@axe-core/playwright";
-
-test("the form has no WCAG A/AA violations", async ({ page }) => {
-  await page.goto("/support/tickets/new");
-  const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-  expect(results.violations).toEqual([]);
-});
-```
+Add the axe scan from `a11y-auditor` (Testing section) for the pages your tests visit — the
+scan setup and WCAG tags are defined there once. Automated checks find only part of the
+problems; the manual checks are in `a11y-auditor` too.
 
 ## Rules for writing tests
 

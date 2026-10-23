@@ -1,12 +1,12 @@
 ---
 name: chrome-devtools
-description: "Runtime debugging of a web application via the Chrome DevTools MCP: Claude starts the local dev server, opens the page in (headless) Chrome, reads console errors and failed network requests, takes a snapshot/screenshot, measures performance (LCP, CLS, INP), and fixes and verifies the errors itself. Use whenever a page 'doesn't work', is blank, throws console errors or fails to load data, when you want to verify a UI change in a real browser, or to measure performance."
+description: "Runtime debugging of a web application via the Chrome DevTools MCP: Claude starts the local dev server, opens the page in (headless) Chrome, reads console errors and failed network requests, takes a snapshot/screenshot, records performance traces, and fixes and verifies the errors itself. Use whenever a page 'doesn't work', is blank, throws console errors or fails to load data, when you want to verify a UI change in a real browser, or need a performance trace of a specific page. For performance targets, budgets and optimization use web-performance."
 triggers:
   - "page doesn't work / is blank / won't load"
   - "console error / hydration error"
   - "API call fails / 404 / 500 / CORS error in the browser"
   - "check it in the browser / take a screenshot"
-  - "why is the page slow / Lighthouse / Core Web Vitals"
+  - "record a performance trace of this page in the browser"
   - "debug in browser / check console"
 metadata:
   type: external-mcp-server
@@ -123,7 +123,7 @@ for i in $(seq 1 60); do curl -fsS -o /dev/null http://localhost:3000 && break; 
 - Walk through the affected flow with interactions (`fill_form`, `click`) and verify the result with `wait_for` / `take_snapshot`.
 
 ### 6. Optional: performance and mobile
-- `performance_start_trace` with a reload → `performance_stop_trace` → `performance_analyze_insight` (LCP, CLS, INP, render-blocking resources).
+- `performance_start_trace` with a reload → `performance_stop_trace` → `performance_analyze_insight` (LCP, CLS, INP, render-blocking resources). Targets and fixes come from `web-performance`.
 - `emulate` a slow network/CPU and `resize_page` to 360×800 to check the mobile layout.
 
 ### 7. Clean up

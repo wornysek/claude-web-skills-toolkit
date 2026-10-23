@@ -180,18 +180,11 @@ minimumReleaseAge: 4320
 - **CI actions** are dependencies too: pin third-party GitHub Actions to a full commit SHA, give workflows `permissions: contents: read` by default (`deploy-and-ops`).
 - **Remove unused dependencies** regularly (`knip`, `depcheck`).
 
-## F. Browser hardening headers
+## F. Other security headers
 
-Set with the other security headers (`backend-security-auditor` F2):
-
-| Header | Value |
-|--------|-------|
-| `Content-Security-Policy` | section B |
-| `X-Content-Type-Options` | `nosniff` |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` |
-| `Permissions-Policy` | disable what you don't use: `camera=(), microphone=(), geolocation=(), payment=()` |
-| `Cross-Origin-Opener-Policy` | `same-origin` (check OAuth popups and payment windows) |
-| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains` (add `preload` deliberately) |
+HSTS, `nosniff`, `Referrer-Policy`, `Permissions-Policy` and `Cross-Origin-Opener-Policy` are
+defined once in `backend-security-auditor` F2. This skill owns only the Content Security
+Policy (section B), Trusted Types and Subresource Integrity.
 
 ---
 

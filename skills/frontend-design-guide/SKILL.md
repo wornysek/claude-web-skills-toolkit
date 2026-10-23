@@ -88,9 +88,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 - Dark mode is not an inverted light version: the background is not `#000` but a dark tinted gray; the accent gets lighter and less saturated.
 
 ### Contrast (WCAG 2.2 AA) — MUST
-- Normal text: **≥ 4.5 : 1**. Large text (≥ 24 px or ≥ 18.66 px bold): **≥ 3 : 1**.
-- Boundaries of UI elements (input border, focus ring, meaningful icons): **≥ 3 : 1** against their surroundings.
-- `text-muted-foreground` must still meet 4.5 : 1 — verify in both modes.
+- Every text and UI color pair meets the contrast thresholds in `a11y-auditor` (section 7) — they are defined there once.
+- When choosing tokens, check the risky pairs explicitly in both modes: `text-muted-foreground` on `bg-background` and `bg-muted`, placeholders, disabled states, input borders and focus rings.
 - Information is never conveyed **by color alone** (ticket status = color + text/icon).
 
 ### Forbidden patterns (anti-AI slop)

@@ -6,7 +6,7 @@ triggers:
   - "button label / error message / empty state / confirmation dialog"
   - "landing page headline / hero copy / CTA"
   - "onboarding texts / tooltips / notifications / emails"
-  - "make the UI text clearer / friendlier / shorter"
+  - "make the UI text clearer / friendlier"
 metadata:
   author: claude-web-skills-toolkit
   license: MIT

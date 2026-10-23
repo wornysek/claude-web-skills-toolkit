@@ -1,6 +1,6 @@
 ---
 name: backend-security-auditor
-description: "Strict security audit and rules for full-stack backends (Next.js/Node.js/Express, Prisma/Drizzle/SQL, Supabase): OAuth2/OpenID Connect sign-in with state and PKCE, passwords, session cookies, admin routes, IDOR and data ownership, RLS, Zod validation, mass assignment, uploads, SQL injection, trimming API responses, CORS, security headers, SSRF, rate limiting, webhook signatures (HMAC, Stripe, public-key) and error messages in production. Use whenever you write or review an API endpoint, server action, authentication, database query, upload, webhook or admin feature."
+description: "Strict security audit and rules for full-stack backends (Next.js/Node.js/Express, Prisma/Drizzle/SQL, Supabase): OAuth2/OpenID Connect sign-in with state and PKCE, passwords, session cookies, admin routes, IDOR and data ownership, RLS, Zod validation, mass assignment, uploads, SQL injection, trimming API responses, CORS, security headers (the CSP lives in frontend-security), SSRF, rate limiting, webhook signatures (HMAC, Stripe, public-key) and error messages in production. Use whenever you write or review an API endpoint, server action, authentication, database query, upload, webhook or admin feature."
 triggers:
   - "API endpoint / route handler / server action"
   - "sign-in / OAuth2 / OpenID Connect / session / cookies / passwords"
@@ -658,7 +658,22 @@ app.use(
 - **Forbidden:** `origin: "*"` with `credentials: true`, reflecting any `Origin`, a regex like `/example\.com/` (matches `evil-example.com`).
 - If the API is called only by your own frontend from the same domain, do **not enable** CORS at all.
 
-### F2. Security headers (Helmet) — MUST
+### F2. Security headers — MUST
+
+This section owns every security header **except the Content Security Policy**, which is
+defined once in `frontend-security` (section B: a nonce-based CSP for HTML pages).
+
+| Header | Value |
+|--------|-------|
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains` — add `preload` only deliberately |
+| `X-Content-Type-Options` | `nosniff` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Permissions-Policy` | disable what you don't use: `camera=(), microphone=(), geolocation=(), payment=()` |
+| `Cross-Origin-Opener-Policy` | `same-origin` (check OAuth popups and payment windows) |
+| `X-Powered-By` | removed |
+| `Content-Security-Policy` | HTML pages: `frontend-security` B · JSON-only APIs: `default-src 'none'; frame-ancestors 'none'` |
+
+Express API (Helmet):
 
 ```ts
 import helmet from "helmet";
@@ -666,36 +681,28 @@ import helmet from "helmet";
 app.disable("x-powered-by");
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "https://cdn.example.com"], // your image CDN / the OAuth provider's avatar host
-        connectSrc: ["'self'"],
-        fontSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        baseUri: ["'self'"],
-        formAction: ["'self'"],
-        frameAncestors: ["'none'"],
-      },
-    },
-    strictTransportSecurity: { maxAge: 63072000, includeSubDomains: true, preload: true },
+    // JSON API: nothing may load or frame its responses. HTML pages use the CSP from frontend-security.
+    contentSecurityPolicy: { useDefaults: false, directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] } },
+    strictTransportSecurity: { maxAge: 63072000, includeSubDomains: true },
     referrerPolicy: { policy: "strict-origin-when-cross-origin" },
     crossOriginOpenerPolicy: { policy: "same-origin" },
   }),
 );
+app.use((_req, res, next) => {
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+  next();
+});
 ```
 
-Next.js equivalent (`next.config.ts`):
+Next.js (`next.config.ts`):
 
 ```ts
 const securityHeaders = [
-  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-  { key: "Content-Security-Policy", value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
 ];
 
 const nextConfig = {
@@ -706,9 +713,8 @@ const nextConfig = {
 };
 
 export default nextConfig;
+// The CSP is set per request with a nonce in the proxy/middleware — frontend-security section B.
 ```
-
-For a full nonce-based CSP, use middleware as described in the Next.js documentation (Content Security Policy guide).
 
 ### F3. SSRF prevention — MUST
 Wherever the server fetches a URL supplied by the user (link previews, avatar from URL,
@@ -951,7 +957,7 @@ Do not declare backend work done until **all** items hold:
 - [ ] Uploads have a size limit, magic-byte check, re-encoding and a random name.
 - [ ] No `*Unsafe` raw query with user input; sorting via an allowlist; no `where` with a possible `undefined`.
 - [ ] Responses use explicit `select`/DTOs and pagination with a maximum.
-- [ ] CORS is an allowlist or disabled; Helmet / security headers are active.
+- [ ] CORS is an allowlist or disabled; the F2 security headers are set; HTML pages have the CSP from `frontend-security`.
 - [ ] Outbound requests to user-supplied URLs go through `safeFetch`.
 - [ ] Sensitive endpoints have a rate limit with shared storage.
 - [ ] Webhooks verify the signature over the raw body and are idempotent.

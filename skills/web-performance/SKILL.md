@@ -21,6 +21,8 @@ a developer laptop.
 
 ## Targets
 
+These targets and budgets are the toolkit's single source; other skills refer to them.
+
 | Metric | Good | What it measures |
 |--------|------|------------------|
 | **LCP** — Largest Contentful Paint | ≤ 2.5 s (landing pages: aim for ≤ 2.0 s) | when the main content appears |

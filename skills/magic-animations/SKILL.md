@@ -137,14 +137,14 @@ create an on-brand first impression. Candidates:
 - **The LCP element (hero heading) must not wait for an animation** — no `initial={{ opacity: 0 }}` on the main heading; animate secondary elements.
 - Heavy backgrounds (canvas, WebGL, particles) are lazy-loaded (`next/dynamic` with `ssr: false`), paused outside the viewport (`IntersectionObserver`) and when the tab is hidden (`visibilitychange`).
 - At most **one** heavy animated background per page; on mobile a simpler variant or a static image.
-- Target after integration: CLS < 0.1, INP < 200 ms, no LCP regression compared to the static version.
+- After integration, Core Web Vitals stay within the `web-performance` targets, with no LCP regression compared to the static version.
 
 ### Accessibility — MUST
 - Respect `prefers-reduced-motion`: a static variant without motion, only instant state changes.
 - No flashing more than 3 times per second (WCAG 2.3.1).
 - Auto-playing motion longer than 5 s must be pausable, or it must be purely decorative and subtle (WCAG 2.2.2).
 - Decorative layers have `aria-hidden="true"` and `pointer-events-none`; they must not cover interactive elements.
-- Text over an animated background must have a contrast of ≥ 4.5 : 1 in **every** frame of the animation.
+- Text over an animated background meets the contrast thresholds in `a11y-auditor` in **every** frame of the animation.
 
 ### Security
 - Downloaded code is third-party code: before inserting it, check that it contains no network calls, external `<script>`, `eval`/`new Function`, `dangerouslySetInnerHTML`, tracking or unexpected dependencies.
