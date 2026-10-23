@@ -1,20 +1,20 @@
 ---
 name: backend-security-auditor
-description: "Strict security audit and rules for full-stack backends (Next.js/Node.js/Express, Prisma/Drizzle/SQL, Supabase): Discord OAuth2 and session cookies, admin routes, IDOR and data ownership, RLS, Zod validation, mass assignment, uploads, SQL injection, trimming API responses, CORS, security headers, SSRF, rate limiting, webhook signatures (Discord/Stripe) and error messages in production. Use whenever you write or review an API endpoint, server action, authentication, database query, upload, webhook or admin feature — especially for whitelist applications, tickets and forums."
+description: "Strict security audit and rules for full-stack backends (Next.js/Node.js/Express, Prisma/Drizzle/SQL, Supabase): OAuth2/OpenID Connect sign-in with state and PKCE, passwords, session cookies, admin routes, IDOR and data ownership, RLS, Zod validation, mass assignment, uploads, SQL injection, trimming API responses, CORS, security headers, SSRF, rate limiting, webhook signatures (HMAC, Stripe, public-key) and error messages in production. Use whenever you write or review an API endpoint, server action, authentication, database query, upload, webhook or admin feature."
 triggers:
   - "API endpoint / route handler / server action"
-  - "Discord sign-in / OAuth2 / session / cookies"
+  - "sign-in / OAuth2 / OpenID Connect / session / cookies / passwords"
   - "admin panel / roles / permissions"
-  - "whitelist application / tickets / forum / comments"
+  - "orders / tickets / comments / any user-generated content"
   - "file upload / avatar / attachment"
-  - "Discord / Stripe webhook"
+  - "webhook from a payment or other provider"
   - "database query / Prisma / Drizzle / SQL / Supabase RLS"
   - "security review / security audit / is this secure?"
 metadata:
   author: claude-web-skills-toolkit
   license: MIT
-  version: "1.0.0"
-  references: "OWASP ASVS 4.0, OWASP API Security Top 10 (2023), CWE Top 25"
+  version: "1.1.0"
+  references: "OWASP ASVS 4.0, OWASP API Security Top 10 (2023), CWE Top 25, OAuth 2.0 Security Best Current Practice (RFC 9700)"
 ---
 
 # Backend Security Auditor
@@ -23,9 +23,10 @@ You are a security engineer. These rules are **mandatory** for all server-side c
 write or modify. They are not recommendations — breaking a rule marked **MUST** is a bug
 that you fix before declaring the work done.
 
-Reference architecture: a community web application with **Discord OAuth2** sign-in,
-**whitelist applications**, **tickets** (support) and a **forum**. Roles: `user`, `moderator`,
-`reviewer` (reviews applications), `admin`. The rules apply to any Node.js backend in general.
+Reference architecture used in the examples: a multi-user web application with **OAuth2 /
+OpenID Connect sign-in** (any provider), **orders**, **support tickets**, **comments**, file
+uploads, an **admin area** and **webhooks** from a payment provider. Roles: `user`, `support`,
+`moderator`, `admin`. The rules apply to any Node.js backend in general.
 
 ## Audit process
 
@@ -39,6 +40,10 @@ Reference architecture: a community web application with **Discord OAuth2** sign
 
 ## A. Authentication and session
 
+> Prefer a maintained auth library or provider (Auth.js, Better Auth, Arctic, Lucia-style
+> session patterns, a managed identity provider) over hand-written auth. The code below shows
+> what such a library must do — use it to **review** whatever is in the project.
+
 ### A1. No tokens in `localStorage` / `sessionStorage` — MUST
 Session tokens, access tokens, refresh tokens and JWTs **must not** be accessible to
 JavaScript. Any XSS would steal them immediately. The session lives exclusively in a cookie:
@@ -49,7 +54,7 @@ Set-Cookie: __Host-session=<opaque>; Path=/; HttpOnly; Secure; SameSite=Lax; Max
 
 - `HttpOnly` — unreadable from JS.
 - `Secure` — HTTPS only.
-- `SameSite=Lax` — blocks cross-site POST (CSRF). **Not `Strict`**: the return from Discord is a cross-site top-level navigation, and with `Strict` the cookie would not be sent.
+- `SameSite=Lax` — blocks cross-site POST (CSRF). **Not `Strict`** when you use OAuth: the return from the provider is a cross-site top-level navigation, and with `Strict` the cookie would not be sent.
 - `__Host-` prefix — the browser enforces `Secure`, `Path=/` and forbids the `Domain` attribute (protection against being overwritten from a subdomain).
 
 ```ts
@@ -98,7 +103,7 @@ export async function getSessionUser() {
   if (!token) return null;
   const session = await db.session.findUnique({
     where: { tokenHash: hashToken(token) },
-    select: { expiresAt: true, user: { select: { id: true, username: true, role: true, bannedAt: true } } },
+    select: { expiresAt: true, user: { select: { id: true, name: true, role: true, bannedAt: true } } },
   });
   if (!session || session.expiresAt < new Date() || session.user.bannedAt) return null;
   return session.user;
@@ -114,35 +119,57 @@ export async function destroySession() {
 
 - A new session is created **after every sign-in** (protection against session fixation).
 - Sign-out **deletes the session on the server**, not just the cookie.
-- A ban/role change takes effect immediately, because the role is read from the DB on every request, not from the cookie.
+- A ban or role change takes effect immediately, because the role is read from the DB on every request, not from the cookie.
 
-### A3. The OAuth2 `state` is mandatory and verified — MUST
-Without `state`, sign-in is vulnerable to CSRF (the attacker signs the victim into the attacker's account).
+### A3. OAuth2 / OpenID Connect: `state`, PKCE and a fixed redirect URI — MUST
+Without `state` the sign-in is vulnerable to login CSRF (the attacker signs the victim into
+the attacker's account); without PKCE an intercepted authorization code can be redeemed.
+The flow below is provider-agnostic — the endpoints come from the provider's documentation
+(or its OpenID Connect discovery document).
 
 ```ts
-// app/api/auth/discord/route.ts — start of sign-in
-import { randomBytes } from "node:crypto";
+// lib/oauth-provider.ts
+import "server-only";
+import { env } from "@/lib/env";
+
+export const provider = {
+  authorizeUrl: env.OAUTH_AUTHORIZE_URL,
+  tokenUrl: env.OAUTH_TOKEN_URL,
+  userInfoUrl: env.OAUTH_USERINFO_URL,
+  clientId: env.OAUTH_CLIENT_ID,
+  clientSecret: env.OAUTH_CLIENT_SECRET,
+  redirectUri: env.OAUTH_REDIRECT_URI, // exact match with the URI registered at the provider
+  scope: "openid email profile",        // minimization: request only what you use
+} as const;
+
+export const OAUTH_COOKIE_OPTIONS = { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 600 } as const;
+```
+
+```ts
+// app/api/auth/oauth/route.ts — start of sign-in
+import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { env } from "@/lib/env";
+import { OAUTH_COOKIE_OPTIONS, provider } from "@/lib/oauth-provider";
 
 export async function GET() {
   const state = randomBytes(32).toString("base64url");
-  (await cookies()).set("__Host-oauth_state", state, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    path: "/",
-    maxAge: 600,
-  });
+  const codeVerifier = randomBytes(32).toString("base64url");
+  const codeChallenge = createHash("sha256").update(codeVerifier).digest("base64url");
 
-  const url = new URL("https://discord.com/oauth2/authorize");
+  const store = await cookies();
+  store.set("__Host-oauth_state", state, OAUTH_COOKIE_OPTIONS);
+  store.set("__Host-oauth_verifier", codeVerifier, OAUTH_COOKIE_OPTIONS);
+
+  const url = new URL(provider.authorizeUrl);
   url.search = new URLSearchParams({
-    client_id: env.DISCORD_CLIENT_ID,
-    redirect_uri: env.DISCORD_REDIRECT_URI, // exact match with the URI registered in the Discord Developer Portal
+    client_id: provider.clientId,
+    redirect_uri: provider.redirectUri,
     response_type: "code",
-    scope: "identify", // minimization: add "email" / "guilds.members.read" only if really needed
+    scope: provider.scope,
     state,
+    code_challenge: codeChallenge,
+    code_challenge_method: "S256",
   }).toString();
 
   return NextResponse.redirect(url);
@@ -150,20 +177,23 @@ export async function GET() {
 ```
 
 ```ts
-// app/api/auth/discord/callback/route.ts — return from Discord
+// app/api/auth/oauth/callback/route.ts — return from the provider
 import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import { env } from "@/lib/env";
+import { OAUTH_COOKIE_OPTIONS, provider } from "@/lib/oauth-provider";
 import { createSession } from "@/lib/session";
-import { upsertDiscordUser } from "@/lib/users";
+import { upsertOAuthUser } from "@/lib/users";
 
-const TokenResponse = z.object({ access_token: z.string().min(1), token_type: z.literal("Bearer") });
-const DiscordUser = z.object({
-  id: z.string().regex(/^\d{17,20}$/),
-  username: z.string().min(1).max(32),
-  avatar: z.string().nullable(),
+const TokenResponse = z.object({ access_token: z.string().min(1), token_type: z.string() });
+// OpenID Connect userinfo; non-OIDC providers return other fields — adapt the schema, keep it strict
+const UserInfo = z.object({
+  sub: z.string().min(1).max(255),
+  email: z.string().email().optional(),
+  email_verified: z.boolean().optional(),
+  name: z.string().max(200).optional(),
+  picture: z.string().url().optional(),
 });
 
 function safeEqual(a: string, b: string) {
@@ -179,19 +209,22 @@ export async function GET(req: NextRequest) {
   const state = req.nextUrl.searchParams.get("state");
   const store = await cookies();
   const expectedState = store.get("__Host-oauth_state")?.value;
-  store.set("__Host-oauth_state", "", { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 0 });
+  const codeVerifier = store.get("__Host-oauth_verifier")?.value;
+  store.set("__Host-oauth_state", "", { ...OAUTH_COOKIE_OPTIONS, maxAge: 0 });
+  store.set("__Host-oauth_verifier", "", { ...OAUTH_COOKIE_OPTIONS, maxAge: 0 });
 
-  if (!code || !state || !expectedState || !safeEqual(state, expectedState)) return fail();
+  if (!code || !state || !expectedState || !codeVerifier || !safeEqual(state, expectedState)) return fail();
 
-  const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
+  const tokenRes = await fetch(provider.tokenUrl, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
     body: new URLSearchParams({
-      client_id: env.DISCORD_CLIENT_ID,
-      client_secret: env.DISCORD_CLIENT_SECRET,
+      client_id: provider.clientId,
+      client_secret: provider.clientSecret,
       grant_type: "authorization_code",
       code,
-      redirect_uri: env.DISCORD_REDIRECT_URI,
+      redirect_uri: provider.redirectUri,
+      code_verifier: codeVerifier,
     }),
     signal: AbortSignal.timeout(5000),
   });
@@ -199,28 +232,44 @@ export async function GET(req: NextRequest) {
   const token = TokenResponse.safeParse(await tokenRes.json());
   if (!token.success) return fail();
 
-  const meRes = await fetch("https://discord.com/api/users/@me", {
+  const meRes = await fetch(provider.userInfoUrl, {
     headers: { Authorization: `Bearer ${token.data.access_token}` },
     signal: AbortSignal.timeout(5000),
   });
   if (!meRes.ok) return fail();
-  const me = DiscordUser.safeParse(await meRes.json());
+  const me = UserInfo.safeParse(await meRes.json());
   if (!me.success) return fail();
 
-  // The identity comes EXCLUSIVELY from Discord's response, never from client parameters.
-  const user = await upsertDiscordUser({ discordId: me.data.id, username: me.data.username, avatar: me.data.avatar });
+  // Link by (provider, subject) — the stable ID from the provider, never from client parameters.
+  // Use the email only if the provider says it is verified.
+  const user = await upsertOAuthUser({
+    provider: "oidc",
+    subject: me.data.sub,
+    email: me.data.email_verified ? me.data.email : undefined,
+    name: me.data.name,
+    avatarUrl: me.data.picture,
+  });
   await createSession(user.id);
 
   return NextResponse.redirect(new URL("/dashboard", req.url));
 }
 ```
 
-- `redirect_uri` is a constant from configuration, **never** from a query parameter (open redirect / `code` theft).
+- `redirect_uri` is a constant from configuration, **never** from a query parameter (open redirect / code theft).
 - Allow a post-sign-in redirect (`?next=/...`) only to relative paths starting with `/` and not `//`.
-- Discard the Discord access token once you have the identity. If you must store it (e.g. to check server membership), store it **encrypted** on the server and never return it to the frontend.
+- **Account linking:** identify users by `(provider, subject)`. Never merge accounts by an **unverified** email — that is an account takeover.
+- With OpenID Connect, a library that validates the **ID token** (signature, `iss`, `aud`, `exp`, `nonce`) is better than calling the userinfo endpoint by hand.
+- Discard the provider's access token once you have the identity. If you must keep it (API calls on the user's behalf), store it **encrypted** on the server and never return it to the frontend.
 - `client_secret` lives only in the server environment — never in a variable with the `NEXT_PUBLIC_` prefix.
 
-### A4. Protecting admin and moderator routes — MUST
+### A4. Passwords and account recovery — MUST (if the app has passwords)
+- Hash with **Argon2id** (or bcrypt / scrypt) through a maintained library — never a fast hash (SHA-256, MD5) and never custom crypto.
+- Minimum length 8 (better 12+), no composition rules, allow paste and password managers; optionally reject known-breached passwords.
+- **Reset and verification tokens:** random, stored **hashed**, single-use, expiring (≤ 1 hour), invalidated after a password change; all other sessions are revoked after a reset.
+- The same response for "email exists" and "email doesn't exist" on sign-in, sign-up and password reset (no account enumeration).
+- Rate-limit sign-in, reset and verification endpoints per account **and** per IP (see G1). Offer 2FA (TOTP or passkeys) for accounts with privileges.
+
+### A5. Protecting admin and staff routes — MUST
 Authorization is enforced **on the server in every handler**. Middleware and hiding buttons
 in the frontend are just UX, not security (see CVE-2025-29927 — bypassing Next.js middleware
 with the `x-middleware-subrequest` header).
@@ -230,9 +279,9 @@ with the `x-middleware-subrequest` header).
 import "server-only";
 import { getSessionUser } from "@/lib/session";
 
-export type Role = "user" | "moderator" | "reviewer" | "admin";
+export type Role = "user" | "support" | "moderator" | "admin";
 
-const ROLE_RANK: Record<Role, number> = { user: 0, reviewer: 1, moderator: 2, admin: 3 };
+const ROLE_RANK: Record<Role, number> = { user: 0, support: 1, moderator: 2, admin: 3 };
 
 export class HttpError extends Error {
   constructor(public readonly status: 401 | 403 | 404 | 409 | 413 | 415 | 422 | 429, message?: string) {
@@ -254,9 +303,9 @@ export async function requireRole(minimum: Role) {
 ```
 
 ```ts
-// app/api/admin/applications/[id]/approve/route.ts
+// app/api/admin/users/[id]/ban/route.ts
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const reviewer = await requireRole("reviewer"); // first line of the handler, no exceptions
+  const moderator = await requireRole("moderator"); // first line of the handler, no exceptions
   const { id } = await params;
   // ...
 }
@@ -264,9 +313,9 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
 
 - Every server action (`"use server"`) is a public HTTP endpoint — it calls `requireUser()`/`requireRole()` first.
 - The role is read from the DB (see A2), never from a JWT claim, cookie or header the client can influence.
-- Admin actions (approving an application, banning, deleting a post) are written to an **audit log** (who, what, when, on which resource).
+- Privileged actions (refunds, bans, role changes, deleting content) are written to an **audit log** (who, what, when, on which resource).
 
-### A5. CSRF on state-changing requests — MUST
+### A6. CSRF on state-changing requests — MUST
 - State changes **never** via `GET` (no `GET /api/tickets/123/close`).
 - `SameSite=Lax` + checking the `Origin` header on `POST`/`PUT`/`PATCH`/`DELETE` in APIs outside server actions (Next.js server actions check Origin themselves).
 
@@ -292,7 +341,7 @@ return Response.json(ticket);
 
 // ✅ The ownership filter is part of the query; staff see everything
 const user = await requireUser();
-const isStaff = user.role === "moderator" || user.role === "admin";
+const isStaff = user.role === "support" || user.role === "moderator" || user.role === "admin";
 const ticket = await db.ticket.findFirst({
   where: { id, ...(isStaff ? {} : { authorId: user.id }) },
   select: ticketDetailSelect,
@@ -300,14 +349,17 @@ const ticket = await db.ticket.findFirst({
 if (!ticket) throw new HttpError(404); // 404, not 403 — don't reveal that the record exists
 ```
 
-Permission matrix for the reference application:
+Write a permission matrix for every resource and keep it next to the code. Example:
 
 | Resource | Read | Create | Update | Delete |
 |----------|------|--------|--------|--------|
-| Whitelist application | owner (without internal notes), reviewer, admin | signed-in user, max. 1 active | owner only in `pending` state | admin |
-| Internal note on an application | reviewer, admin | reviewer, admin | note author | admin |
-| Ticket | owner, moderator, admin | signed-in user | owner (text), staff (status) | admin |
-| Forum post | public / per category | signed-in, not banned | author (time limit), moderator | author, moderator |
+| Order | owner, support, admin | signed-in user | owner while `pending`; staff (status) | admin (soft delete) |
+| Internal note on a ticket | support, admin | support, admin | note author | admin |
+| Ticket | owner, support, admin | signed-in user | owner (text), staff (status) | admin |
+| Comment | public or per visibility | signed-in, not banned | author (time limit), moderator | author, moderator |
+
+IDs referenced **inside** a request body are objects too: an order's `shippingAddressId`, a
+comment's `parentId`, an invoice's `customerId` — check that each belongs to the user.
 
 ### B2. UUID v4 instead of sequential IDs — MUST
 Publicly visible identifiers are `uuid` (v4, `crypto.randomUUID()`), not `1, 2, 3…`.
@@ -336,7 +388,7 @@ ALTER TABLE public.tickets FORCE ROW LEVEL SECURITY;
 
 CREATE OR REPLACE FUNCTION public.is_staff(uid uuid) RETURNS boolean
   LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
-  SELECT EXISTS (SELECT 1 FROM public.users WHERE id = uid AND role IN ('moderator', 'admin'));
+  SELECT EXISTS (SELECT 1 FROM public.users WHERE id = uid AND role IN ('support', 'moderator', 'admin'));
 $$;
 
 CREATE POLICY tickets_select ON public.tickets
@@ -362,17 +414,18 @@ Body, query, route params, headers used in logic and webhook data. Client-side v
 just UX.
 
 ```ts
-// lib/schemas/application.ts
+// lib/schemas/order.ts
 import { z } from "zod";
 
-export const CreateApplicationSchema = z
+export const CreateOrderSchema = z
   .object({
-    inGameName: z.string().trim().regex(/^[A-Za-z0-9_]{3,16}$/, "3–16 characters: letters, digits, underscore"),
-    age: z.coerce.number().int().min(13).max(120),
-    timezone: z.string().trim().max(64),
-    motivation: z.string().trim().min(50).max(2000),
-    referral: z.string().trim().max(100).optional(),
-    rulesAccepted: z.literal(true),
+    items: z
+      .array(z.object({ productId: z.string().uuid(), quantity: z.number().int().min(1).max(99) }))
+      .min(1)
+      .max(50),
+    shippingAddressId: z.string().uuid(),
+    note: z.string().trim().max(500).optional(),
+    termsAccepted: z.literal(true),
   })
   .strict(); // unknown keys => error, not silent ignoring
 
@@ -380,10 +433,10 @@ export const IdParamSchema = z.object({ id: z.string().uuid() });
 ```
 
 ```ts
-// app/api/applications/route.ts
+// app/api/orders/route.ts
 export async function POST(req: Request) {
   const user = await requireUser();
-  const parsed = CreateApplicationSchema.safeParse(await req.json().catch(() => null));
+  const parsed = CreateOrderSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) {
     return Response.json({ error: "validation_error", issues: parsed.error.flatten().fieldErrors }, { status: 422 });
   }
@@ -394,26 +447,43 @@ export async function POST(req: Request) {
 - Every string has a `max()` length. Every number has `min()`/`max()`. Every array/collection has a `max()` item count.
 - Validate IDs from the URL as `uuid()` before they reach a query.
 
-### C2. No mass assignment — MUST
+### C2. No mass assignment, no client-supplied prices — MUST
 **Never** save `req.body` (or a spread of it) directly to the database. The attacker adds
-`"role": "admin"`, `"status": "approved"` or `"authorId": "<someone else's id>"`.
+`"role": "admin"`, `"status": "paid"`, `"totalCents": 0` or `"customerId": "<someone else's id>"`.
+Anything with business meaning — owner, status, price, discount, permissions — is decided by
+the server.
 
 ```ts
 // ❌ FORBIDDEN
 await db.user.update({ where: { id: user.id }, data: await req.json() });
-await db.application.create({ data: { ...body, applicantId: user.id } });
+await db.order.create({ data: { ...body, customerId: user.id } });
 
-// ✅ Explicit mapping of allowed fields; the server decides the owner and status
-const input = CreateApplicationSchema.parse(await req.json());
-await db.application.create({
+// ✅ Explicit mapping; owner, status and prices come from the server
+const input = CreateOrderSchema.parse(await req.json());
+await assertAddressOwner(input.shippingAddressId, user.id); // B1 for IDs inside the body
+
+const productIds = [...new Set(input.items.map((item) => item.productId))];
+const products = await db.product.findMany({
+  where: { id: { in: productIds }, active: true },
+  select: { id: true, priceCents: true },
+});
+if (products.length !== productIds.length) throw new HttpError(422);
+const price = new Map(products.map((product) => [product.id, product.priceCents]));
+
+await db.order.create({
   data: {
-    applicantId: user.id,
+    customerId: user.id,
     status: "pending",
-    inGameName: input.inGameName,
-    age: input.age,
-    timezone: input.timezone,
-    motivation: input.motivation,
-    referral: input.referral ?? null,
+    shippingAddressId: input.shippingAddressId,
+    note: input.note ?? null,
+    totalCents: input.items.reduce((sum, item) => sum + price.get(item.productId)! * item.quantity, 0),
+    items: {
+      create: input.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPriceCents: price.get(item.productId)!,
+      })),
+    },
   },
 });
 ```
@@ -458,6 +528,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 - Also set a body size limit at the infrastructure level (reverse proxy `client_max_body_size`, `serverActions.bodySizeLimit`, `express.json({ limit: "100kb" })`).
 - **No SVG or HTML** from users (stored XSS). If they are required, sanitize them and serve them from a different domain.
 - Files are stored outside the web root (object storage) and served with `X-Content-Type-Options: nosniff`, and non-previewable types with `Content-Disposition: attachment`.
+- Documents (PDF, office files) are scanned for malware before anyone else downloads them.
 
 ---
 
@@ -468,15 +539,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 ```ts
 // ❌ SQL injection
 await db.$queryRawUnsafe(`SELECT * FROM posts WHERE title ILIKE '%${q}%'`);
-await pool.query(`SELECT * FROM users WHERE discord_id = '${discordId}'`);
+await pool.query(`SELECT * FROM users WHERE email = '${email}'`);
 
 // ✅ Parameters
 await db.$queryRaw`SELECT id, title FROM posts WHERE title ILIKE ${"%" + q + "%"} LIMIT 50`;
-await pool.query("SELECT id, username FROM users WHERE discord_id = $1", [discordId]);
+await pool.query("SELECT id, name FROM users WHERE email = $1", [email]);
 ```
 
 - `$queryRawUnsafe`, `$executeRawUnsafe`, Drizzle `sql.raw()`, Knex `raw()` with interpolation → forbidden for any user input.
-- Dynamic identifiers (sort column, direction) only via a whitelist:
+- Dynamic identifiers (sort column, direction) only via an allowlist:
 
 ```ts
 const SortSchema = z.object({
@@ -515,8 +586,8 @@ const tickets = await db.ticket.findMany({
 
 ### E1. Return only what the UI displays — MUST
 Never return a whole DB record. The following **must not** reach the frontend: password hashes,
-session/OAuth tokens, API keys, other users' emails and IP addresses, reviewers' internal notes,
-moderation flags, whole tables.
+session/OAuth tokens, API keys, other users' emails and IP addresses, internal staff notes,
+fraud or moderation flags, purchase prices and margins, whole tables.
 
 ```ts
 // lib/selects.ts
@@ -524,9 +595,8 @@ import type { Prisma } from "@prisma/client";
 
 export const publicUserSelect = {
   id: true,
-  username: true,
+  name: true,
   avatarUrl: true,
-  role: true,
 } satisfies Prisma.UserSelect;
 
 export const ticketListSelect = {
@@ -537,19 +607,19 @@ export const ticketListSelect = {
   author: { select: publicUserSelect },
 } satisfies Prisma.TicketSelect;
 
-// Application as seen by the applicant — without internal notes and the reviewer's identity
-export const applicationForApplicantSelect = {
+// Order as seen by the customer — without internal notes, fraud score or supplier cost
+export const orderForCustomerSelect = {
   id: true,
   status: true,
-  inGameName: true,
-  submittedAt: true,
-  decidedAt: true,
-  publicDecisionReason: true,
-} satisfies Prisma.ApplicationSelect;
+  totalCents: true,
+  currency: true,
+  createdAt: true,
+  items: { select: { productId: true, quantity: true, unitPriceCents: true } },
+} satisfies Prisma.OrderSelect;
 ```
 
 ```ts
-// ❌ Returns passwordHash, discordAccessToken, email, ipAddress ...
+// ❌ Returns passwordHash, oauthAccessToken, email, lastLoginIp ...
 return Response.json(await db.user.findMany());
 
 // ✅
@@ -564,7 +634,7 @@ return Response.json(await db.user.findMany({ select: publicUserSelect, take: 50
 
 ## F. Network and headers
 
-### F1. Restrictive CORS whitelist — MUST
+### F1. Restrictive CORS allowlist — MUST
 
 ```ts
 import cors from "cors";
@@ -601,12 +671,12 @@ app.use(
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:", "https://cdn.discordapp.com"],
+        imgSrc: ["'self'", "data:", "https://cdn.example.com"], // your image CDN / the OAuth provider's avatar host
         connectSrc: ["'self'"],
         fontSrc: ["'self'"],
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
-        formAction: ["'self'", "https://discord.com"],
+        formAction: ["'self'"],
         frameAncestors: ["'none'"],
       },
     },
@@ -641,8 +711,8 @@ export default nextConfig;
 For a full nonce-based CSP, use middleware as described in the Next.js documentation (Content Security Policy guide).
 
 ### F3. SSRF prevention — MUST
-Wherever the server fetches a URL supplied by the user (forum link previews, avatar from URL,
-webhook URL, import), validate the target and block internal addresses (including cloud
+Wherever the server fetches a URL supplied by the user (link previews, avatar from URL,
+webhook URLs, imports), validate the target and block internal addresses (including cloud
 metadata `169.254.169.254`).
 
 ```ts
@@ -689,12 +759,13 @@ export async function safeFetch(raw: string): Promise<ArrayBuffer> {
 ### G1. Rate limiting — MUST
 Limit per user **and** per IP. Minimum set:
 
-| Endpoint | Limit |
-|----------|-------|
-| `/api/auth/*` (OAuth start + callback) | 20 / 15 min / IP |
-| Submitting a whitelist application | 3 / hour / user |
+| Endpoint | Example limit |
+|----------|---------------|
+| Sign-in, OAuth start and callback | 20 / 15 min / IP |
+| Password reset, verification emails, one-time codes | 5 / hour / account and / IP |
+| Creating records (orders, sign-up forms, contact forms) | 10 / hour / user or IP |
 | Creating a ticket | 10 / hour / user |
-| Forum post / comment | 30 / 10 min / user |
+| Comments and posts | 30 / 10 min / user |
 | Upload | 20 / hour / user |
 
 ```ts
@@ -702,13 +773,13 @@ Limit per user **and** per IP. Minimum set:
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
-const applicationLimiter = new Ratelimit({
+const orderLimiter = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(3, "1 h"),
-  prefix: "rl:application",
+  limiter: Ratelimit.slidingWindow(10, "1 h"),
+  prefix: "rl:order",
 });
 
-const { success, reset } = await applicationLimiter.limit(`user:${user.id}`);
+const { success, reset } = await orderLimiter.limit(`user:${user.id}`);
 if (!success) {
   return Response.json(
     { error: "rate_limited" },
@@ -729,43 +800,37 @@ An in-memory limiter **does not work** in serverless or with multiple instances.
 
 ### G2. Verifying cryptographic webhook signatures — MUST
 The signature is verified over the **raw request body** (before JSON parsing) and before any
-other logic.
+other logic. Header names, encodings (hex / base64) and what exactly is signed differ per
+provider — follow its documentation, and enforce the timestamp tolerance if it sends one.
 
-**Discord Interactions (Ed25519):**
+**HMAC-SHA256** (the most common scheme; the example uses the `sha256=<hex>` header format):
 
 ```ts
-// app/api/discord/interactions/route.ts
-import { createPublicKey, verify } from "node:crypto";
-import { env } from "@/lib/env";
+// lib/webhooks.ts
+import { createHmac, timingSafeEqual } from "node:crypto";
 
-const discordPublicKey = createPublicKey({
-  key: { kty: "OKP", crv: "Ed25519", x: Buffer.from(env.DISCORD_PUBLIC_KEY, "hex").toString("base64url") },
-  format: "jwk",
-});
-
-export async function POST(req: Request) {
-  const signature = req.headers.get("x-signature-ed25519");
-  const timestamp = req.headers.get("x-signature-timestamp");
-  const rawBody = await req.text();
-
-  if (!signature || !timestamp || !/^[0-9a-f]{128}$/i.test(signature)) {
-    return new Response("invalid request signature", { status: 401 });
-  }
-  const valid = verify(null, Buffer.from(timestamp + rawBody), discordPublicKey, Buffer.from(signature, "hex"));
-  if (!valid) return new Response("invalid request signature", { status: 401 });
-
-  const ageSeconds = Math.abs(Date.now() / 1000 - Number(timestamp));
-  if (!Number.isFinite(ageSeconds) || ageSeconds > 300) {
-    return new Response("stale request", { status: 401 });
-  }
-
-  const interaction = InteractionSchema.parse(JSON.parse(rawBody));
-  if (interaction.type === 1) return Response.json({ type: 1 }); // PING → PONG
-  // ...
+export function verifyHmacSha256(rawBody: string, signatureHeader: string | null, secret: string) {
+  if (!signatureHeader?.startsWith("sha256=")) return false;
+  const expected = Buffer.from(`sha256=${createHmac("sha256", secret).update(rawBody).digest("hex")}`);
+  const received = Buffer.from(signatureHeader);
+  return expected.length === received.length && timingSafeEqual(expected, received);
 }
 ```
 
-**Stripe:**
+```ts
+// app/api/webhooks/provider/route.ts
+export async function POST(req: Request) {
+  const rawBody = await req.text();
+  if (!verifyHmacSha256(rawBody, req.headers.get("x-signature-256"), env.WEBHOOK_SECRET)) {
+    return new Response("invalid signature", { status: 401 });
+  }
+  const event = WebhookEventSchema.parse(JSON.parse(rawBody));
+  // ... idempotent processing (see below)
+  return new Response(null, { status: 200 });
+}
+```
+
+**Stripe** (use the SDK — it checks the signature and the timestamp):
 
 ```ts
 // app/api/stripe/webhook/route.ts
@@ -786,7 +851,7 @@ export async function POST(req: Request) {
     return new Response("invalid signature", { status: 400 });
   }
 
-  // Idempotency: Stripe delivers "at least once"
+  // Idempotency: providers deliver "at least once"
   const firstDelivery = await db.processedWebhook.createMany({
     data: [{ id: event.id, provider: "stripe" }],
     skipDuplicates: true,
@@ -798,8 +863,27 @@ export async function POST(req: Request) {
 }
 ```
 
+**Public-key signatures** (e.g. Ed25519, used by some chat platforms and payment providers):
+
+```ts
+// lib/webhooks.ts
+import { createPublicKey, verify } from "node:crypto";
+
+export function verifyEd25519(message: string, signatureHex: string, publicKeyHex: string) {
+  if (!/^[0-9a-f]{128}$/i.test(signatureHex)) return false;
+  const key = createPublicKey({
+    key: { kty: "OKP", crv: "Ed25519", x: Buffer.from(publicKeyHex, "hex").toString("base64url") },
+    format: "jwk",
+  });
+  return verify(null, Buffer.from(message), key, Buffer.from(signatureHex, "hex"));
+}
+
+// Typically the signed message is timestamp + raw body; reject timestamps older than ~5 minutes.
+```
+
 - In Express, use `express.raw({ type: "application/json" })` for the webhook route, not `express.json()`.
 - Map identifiers from the webhook (e.g. `customer`) to users through your own DB; do not trust metadata without verification.
+- Respond quickly (2xx) and do heavy work in a background job.
 
 ### G3. No stack traces or internal details in production — MUST
 
@@ -833,10 +917,13 @@ export const env = z
   .object({
     APP_ORIGIN: z.string().url(),
     DATABASE_URL: z.string().url(),
-    DISCORD_CLIENT_ID: z.string().regex(/^\d{17,20}$/),
-    DISCORD_CLIENT_SECRET: z.string().min(16),
-    DISCORD_REDIRECT_URI: z.string().url(),
-    DISCORD_PUBLIC_KEY: z.string().regex(/^[0-9a-f]{64}$/i),
+    OAUTH_AUTHORIZE_URL: z.string().url(),
+    OAUTH_TOKEN_URL: z.string().url(),
+    OAUTH_USERINFO_URL: z.string().url(),
+    OAUTH_CLIENT_ID: z.string().min(1),
+    OAUTH_CLIENT_SECRET: z.string().min(16),
+    OAUTH_REDIRECT_URI: z.string().url(),
+    WEBHOOK_SECRET: z.string().min(32),
     STRIPE_SECRET_KEY: z.string().startsWith("sk_"),
     STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_"),
   })
@@ -846,6 +933,7 @@ export const env = z
 - `.env*` files are in `.gitignore`; only `.env.example` without values belongs in the repository.
 - Nothing secret has the `NEXT_PUBLIC_` / `VITE_` / `PUBLIC_` prefix.
 - Modules with secrets import `server-only`, so the bundler refuses to include them in the client.
+- The toolkit's guard hook (`./install.sh --hooks`) blocks writing secrets into source files.
 
 ---
 
@@ -854,15 +942,16 @@ export const env = z
 Do not declare backend work done until **all** items hold:
 
 - [ ] No token is in `localStorage`/`sessionStorage`; the session cookie is `__Host-`, `HttpOnly`, `Secure`, `SameSite=Lax`.
-- [ ] The OAuth flow generates, stores and timing-safe compares `state`; `redirect_uri` is a constant.
+- [ ] OAuth uses `state` (timing-safe compared) and PKCE; `redirect_uri` is a constant; accounts are linked by provider subject, emails only when verified.
+- [ ] Passwords (if any) use Argon2id/bcrypt via a library; reset tokens are hashed, single-use and short-lived; no account enumeration.
 - [ ] Every handler / server action starts with `requireUser()` or `requireRole()` (exceptions are explicitly public and documented).
-- [ ] Every access to an object by ID filters ownership in the query; someone else's record returns 404.
+- [ ] Every access to an object by ID — in the URL **or** in the body — checks ownership; someone else's record returns 404.
 - [ ] Public IDs are UUIDs; new tables have RLS (if the DB is reachable outside the backend).
-- [ ] Every input goes through a `.strict()` Zod schema with length limits; no `req.body` in `data:`.
+- [ ] Every input goes through a `.strict()` Zod schema with length limits; no `req.body` in `data:`; prices, status and owner come from the server.
 - [ ] Uploads have a size limit, magic-byte check, re-encoding and a random name.
-- [ ] No `*Unsafe` raw query with user input; sorting via whitelist; no `where` with a possible `undefined`.
+- [ ] No `*Unsafe` raw query with user input; sorting via an allowlist; no `where` with a possible `undefined`.
 - [ ] Responses use explicit `select`/DTOs and pagination with a maximum.
-- [ ] CORS is a whitelist or disabled; Helmet / security headers are active.
+- [ ] CORS is an allowlist or disabled; Helmet / security headers are active.
 - [ ] Outbound requests to user-supplied URLs go through `safeFetch`.
 - [ ] Sensitive endpoints have a rate limit with shared storage.
 - [ ] Webhooks verify the signature over the raw body and are idempotent.
@@ -876,16 +965,16 @@ Do not declare backend work done until **all** items hold:
 | # | Severity | Category | CWE | Finding | File:line | Fix |
 |---|----------|----------|-----|---------|-----------|-----|
 | 1 | 🔴 Critical | IDOR | CWE-639 | GET /api/tickets/[id] does not filter by owner | app/api/tickets/[id]/route.ts:12 | `authorId: user.id` filter in the query, 404 |
-| 2 | 🔴 Critical | Mass Assignment | CWE-915 | `data: body` allows setting `role` | app/api/profile/route.ts:20 | explicit field mapping |
-| 3 | 🟠 High | Auth | CWE-352 | OAuth callback does not verify `state` | app/api/auth/discord/callback/route.ts:8 | state cookie + timingSafeEqual |
-| 4 | 🟡 Medium | Rate limiting | CWE-770 | Application submission has no limit | app/api/applications/route.ts:5 | Upstash sliding window 3/h |
+| 2 | 🔴 Critical | Mass Assignment | CWE-915 | Order total is taken from the request body | app/api/orders/route.ts:20 | compute prices from the DB, explicit field mapping |
+| 3 | 🟠 High | Auth | CWE-352 | OAuth callback does not verify `state` | app/api/auth/oauth/callback/route.ts:8 | state cookie + timingSafeEqual, add PKCE |
+| 4 | 🟡 Medium | Rate limiting | CWE-770 | Password reset has no limit | app/api/auth/reset/route.ts:5 | 5/h per account and IP, shared store |
 
 **Verified with no findings:** <list of sections>
 **Out of scope / cannot verify:** <e.g. reverse proxy configuration>
 ```
 
 Severity:
-- 🔴 **Critical** — direct access to other users' data, account takeover, privilege escalation, RCE, SQLi.
+- 🔴 **Critical** — direct access to other users' data, account takeover, privilege escalation, payment manipulation, RCE, SQLi.
 - 🟠 **High** — CSRF, missing signature verification, leaking tokens/personal data, SSRF.
 - 🟡 **Medium** — missing rate limit, overly broad CORS, missing headers, stack trace leak.
 - ⚪ **Low** — hardening and defense in depth.
@@ -896,3 +985,4 @@ Severity:
 - If the user requests a dangerous pattern (token in `localStorage`), explain the risk in one sentence and implement the secure variant; implement the dangerous one only on an explicit repeated request, with a `// SECURITY:` comment in the code.
 - Do not invent library APIs — when unsure, check the documentation of the current version.
 - Always accompany security fixes with a test (unit or E2E via `webapp-testing`).
+- Related skills: `gdpr-privacy` (personal data, retention, processors), `webapp-testing` (regression tests), `tech-stack-advisor` (choosing an auth library or provider).
