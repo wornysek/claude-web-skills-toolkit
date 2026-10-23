@@ -26,6 +26,7 @@ bash ~/claude-web-skills-toolkit/install.sh --all
 - [Instalace](#instalace)
 - [Integrace do existujícího projektu](#integrace-do-existujícího-projektu)
 - [Jak skilly fungují](#jak-skilly-fungují)
+- [Hook: slop & secrets guard](#hook-slop--secrets-guard)
 - [Bezpečnost toolkitu](#bezpečnost-toolkitu)
 - [Aktualizace a odinstalace](#aktualizace-a-odinstalace)
 - [Přispívání](#přispívání)
@@ -36,17 +37,20 @@ bash ~/claude-web-skills-toolkit/install.sh --all
 ## Proč tento toolkit
 
 AI agenti dnes vygenerují funkční webovou aplikaci za pár minut. Bez pravidel ale
-opakovaně produkují tři typy problémů:
+opakovaně produkují stejné typy problémů:
 
 | Problém | Jak vypadá | Co s tím toolkit dělá |
 |---------|------------|-----------------------|
 | **AI slop v designu** | Fialovo-růžové gradienty, Inter všude, vycentrované všechno, emoji místo ikon, žádné loading/empty stavy, komponenty psané z nuly | `frontend-design-guide` zakazuje generické vzory a vynucuje tokeny, skeletony a empty states. `shadcn-ui` nutí agenta brát komponenty z registru. Oficiální plugin `frontend-design` dodá estetický směr. `magic-animations` přidá promyšlené animace s ohledem na výkon. |
-| **Nebezpečný kód** | Tokeny v `localStorage`, chybějící kontrola vlastnictví (IDOR), `req.body` rovnou do DB, OAuth bez `state`, webhooky bez ověření podpisu, stack traces v produkci | `backend-security-auditor` obsahuje striktní pravidla (MUSÍ) pro auth, IDOR, validaci, DB, API odpovědi, hlavičky a produkci včetně hotových bezpečných vzorů kódu a závěrečné „Security Gate“. |
+| **Nebezpečný kód** | Tokeny v `localStorage`, chybějící kontrola vlastnictví (IDOR), `req.body` rovnou do DB, OAuth bez `state`, webhooky bez ověření podpisu, stack traces v produkci, API klíče vložené přímo do kódu | `backend-security-auditor` obsahuje striktní pravidla (MUSÍ) pro auth, IDOR, validaci, DB, API odpovědi, hlavičky a produkci včetně hotových bezpečných vzorů kódu a závěrečné „Security Gate“. Volitelný hlídací hook zablokuje tajné hodnoty dřív, než se zapíšou do souboru. |
 | **Ignorování UX** | 4 stejně výrazná tlačítka, malé dotykové cíle, žádná zpětná vazba po kliknutí, formulář ztratí data po chybě | `ux-laws` převádí 20 zákonů UX (Hick, Fitts, Doherty < 400 ms, Peak-End…) na ověřitelné *Implementation Checks*. `vercel-web-guidelines` spouští automatizovaný design audit (spacing, grid, kontrast). |
+| **AI slop v textech** | „Posuňte svou komunitu na další úroveň“, „Něco se pokazilo“, „Odeslat“, vymyšlené „10 000+ spokojených uživatelů“, emoji v nadpisech, „nejde jen o X, jde o Y“ | `ux-writing-en` / `ux-writing-cs` dávají pravidla pro tlačítka, chybové hlášky, empty states, texty landing page a lokalizaci; český skill navíc řeší skloňování, plurály, tykání a vykání a typografii. `deslop-en` / `deslop-cs` jsou korektury, které odstraní typické AI obraty a nezmění fakta. Hlídací hook je po každé úpravě označí automaticky. <!-- guard:allow --> |
+| **Neviditelné nebo v rozporu s GDPR** | Jeden titulek pro celý web, žádné náhledy pro sdílení, indexované administrace a staging, analytika běžící před souhlasem, žádná možnost exportu dat ani smazání účtu | `seo-metadata` řeší titulky, kanonické URL, OG obrázky, sitemap, robots, hreflang a JSON-LD. `gdpr-privacy` řeší minimalizaci dat, souhlas bez manipulativních triků, práva subjektů údajů, dobu uchovávání a osobní údaje v logech. |
 
 Kvalitu navíc **ověřuje v běhu**: `webapp-testing` generuje a spouští Playwright E2E
-testy, `chrome-devtools` čte chyby z konzole skutečného prohlížeče a `superpowers-debugging`
-vynucuje deterministický postup oprav bez maskování chyb.
+testy, `chrome-devtools` čte chyby z konzole skutečného prohlížeče, `superpowers-debugging`
+vynucuje deterministický postup oprav bez maskování chyb a volitelný
+[hlídací hook](#hook-slop--secrets-guard) kontroluje každý soubor, který Claude zapíše.
 
 ## Co je uvnitř
 
@@ -58,11 +62,22 @@ claude-web-skills-toolkit/
 ├── .gitignore
 ├── .gitattributes                 # LF konce řádků pro install.sh i na Windows
 ├── install.sh                     # instalátor (interaktivní / --all)
+├── hooks/
+│   ├── slop-secrets-guard.sh      # hook pro Claude Code: blokuje tajné hodnoty, hlásí AI obraty
+│   └── settings.example.json      # registrace hooku pro .claude/settings.json
 └── skills/
     ├── ux-laws/                   # vlastní — 20 zákonů UX
     ├── backend-security-auditor/  # vlastní — bezpečnostní pravidla backendu
     ├── frontend-design-guide/     # vlastní — anti-AI-slop UI pravidla
     ├── webapp-testing/            # vlastní — Playwright E2E
+    ├── ux-writing-en/             # vlastní — anglické texty v UI a na webu
+    ├── ux-writing-cs/             # vlastní — české texty v UI a na webu
+    ├── deslop-en/                 # vlastní — odstranění AI obratů (angličtina)
+    ├── deslop-cs/                 # vlastní — odstranění AI obratů (čeština)
+    ├── tech-stack-advisor/        # vlastní — volba tech stacku, zapsaná jako ADR
+    ├── i18n-setup/                # vlastní — vícejazyčné aplikace: routing, překlady, formáty
+    ├── seo-metadata/              # vlastní — technické SEO a metadata pro sdílení
+    ├── gdpr-privacy/              # vlastní — GDPR a ochrana osobních údajů v kódu
     ├── shadcn-ui/                 # wrapper — shadcn MCP server
     ├── vercel-web-guidelines/     # wrapper — Vercel Labs agent skills
     ├── chrome-devtools/           # wrapper — Chrome DevTools MCP
@@ -86,6 +101,15 @@ obsahují zdroj, autora, licenci, přesný postup instalace, JSON konfiguraci a 
 | [`backend-security-auditor`](skills/backend-security-auditor/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/backend-security-auditor .claude/skills/` | API endpoint, server action, Discord OAuth, admin cesty, přihlášky, tickety, fórum, upload, webhook, „je to bezpečné?“ |
 | [`frontend-design-guide`](skills/frontend-design-guide/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/frontend-design-guide .claude/skills/` | Nová stránka/komponenta, „udělej to hezčí“, fonty, barvy, skeleton, empty state |
 | [`webapp-testing`](skills/webapp-testing/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/webapp-testing .claude/skills/` | „Otestuj formulář“, E2E testy, validace, chybové hlášky, přesměrování po odeslání |
+| [`ux-writing-en`](skills/ux-writing-en/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/ux-writing-en .claude/skills/` | Jakýkoli anglický text pro uživatele: tlačítka, chyby, empty states, landing page, onboarding, e-maily |
+| [`ux-writing-cs`](skills/ux-writing-cs/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/ux-writing-cs .claude/skills/` | Jakýkoli český text pro uživatele; tykání a vykání, skloňování, plurály, česká typografie |
+| [`deslop-en`](skills/deslop-en/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/deslop-en .claude/skills/` | `/deslop-en <soubor>`, „zní to jako AI“, README, dokumentace, popisy PR, commit zprávy |
+| [`deslop-cs`](skills/deslop-cs/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/deslop-cs .claude/skills/` | `/deslop-cs <soubor>`, český text, který zní jako AI nebo jako překlad |
+| [`tech-stack-advisor`](skills/tech-stack-advisor/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/tech-stack-advisor .claude/skills/` | Nový projekt, „na čem to postavit?“, srovnání frameworků, databází, autentizace nebo hostingu, migrace |
+| [`i18n-setup`](skills/i18n-setup/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/i18n-setup .claude/skills/` | Přidání jazyka, routing podle jazyka, soubory s překlady, ICU plurály, formáty, přepínač jazyka, chybějící překlady |
+| [`seo-metadata`](skills/seo-metadata/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/seo-metadata .claude/skills/` | Nová veřejná stránka, metadata, OG obrázky, sitemap, robots, noindex, hreflang, JSON-LD |
+| [`gdpr-privacy`](skills/gdpr-privacy/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/gdpr-privacy .claude/skills/` | Registrace, formuláře s osobními údaji, cookies, analytika, souhlas, export a smazání účtu, logování |
+| [Hlídací hook (slop & secrets guard)](hooks/slop-secrets-guard.sh) | Hook pro Claude Code | claude-web-skills-toolkit · MIT | `./install.sh --hooks` | Spouští se automaticky při každém Write/Edit: blokuje tajné hodnoty, hlásí AI obraty |
 | `frontend-design` (plugin) | Oficiální Plugin | Anthropic (P. Rajasekaran, A. Bricken) · © Anthropic PBC, Commercial ToS | `claude plugin marketplace add anthropics/claude-code`<br>`claude plugin install frontend-design@claude-code-plugins` | Tvorba frontendu s výrazným estetickým směrem; doplňuje `frontend-design-guide` |
 | [`superpowers-debugging`](skills/superpowers-debugging/SKILL.md) → `superpowers` | Oficiální Plugin | Jesse Vincent (obra) · MIT · distribuce: Anthropic `claude-plugins-official` | `claude plugin install superpowers@claude-plugins-official` | Bug, padající test, výjimka, regrese, „oprava nezabrala“ |
 | [`shadcn-ui`](skills/shadcn-ui/SKILL.md) | Externí MCP Server | shadcn · MIT · doporučení: Colton Dean | `npx shadcn@latest mcp init --client claude` | Formulář, tlačítko, dialog, menu, tabulka, select, toast — jakákoli UI komponenta |
@@ -106,8 +130,9 @@ obsahují zdroj, autora, licenci, přesný postup instalace, JSON konfiguraci a 
 |---------|------|---------|
 | [Claude Code](https://claude.com/claude-code) | pluginy, registrace MCP serverů | `claude --version` |
 | Node.js 20+ a `npx` | shadcn, Vercel skills, chrome-devtools-mcp | `node -v`, `npx -v` |
-| Bash 3.2+ | `install.sh` (macOS, Linux, Git Bash nebo WSL na Windows) | `bash --version` |
+| Bash 3.2+ | `install.sh` a hlídací hook (macOS, Linux, Git Bash nebo WSL na Windows) | `bash --version` |
 | Google Chrome | Chrome DevTools MCP | — |
+| Node.js nebo Python 3 | jen pro sloučení hooku s existujícím `.claude/settings.json` | `node -v` / `python3 --version` |
 
 `install.sh` kontroluje dostupnost `claude` a `npx` a komponenty, pro které nástroj chybí,
 přeskočí s jasnou hláškou.
@@ -142,12 +167,13 @@ Na macOS/Linuxu můžete skript spouštět i přímo (`chmod +x install.sh && ./
 | `--plugins` | Přidá marketplace `anthropics/claude-code` a nainstaluje `frontend-design@claude-code-plugins` a `superpowers@claude-plugins-official` |
 | `--chrome` | `claude mcp add chrome-devtools --scope user npx chrome-devtools-mcp@latest` |
 | `--shadcn` | `npx shadcn@latest mcp init --client claude` (zapíše `.mcp.json` v projektu) |
-| `--vercel` | `npx skills add vercel-labs/agent-skills` (neinteraktivně: `web-design-guidelines`, `react-best-practices` pro Claude Code) |
+| `--vercel` | `npx skills add vercel-labs/agent-skills` (neinteraktivně: `web-design-guidelines`, `react-best-practices`, `writing-guidelines` pro Claude Code) |
 | `--magic` | Registruje 21st.dev MCP (klíč z `API_KEY_21ST`, jinak skrytý dotaz; bez klíče přeskočí) |
 | `--mcp` | Zkratka pro `--chrome --shadcn --magic` |
 | `--skills` | Zkopíruje `skills/*` do `./.claude/skills/` |
+| `--hooks` | Nainstaluje hlídací hook do `./.claude/hooks/` a zaregistruje ho v `./.claude/settings.json` (sloučí, se zálohou `.bak`) |
 | `--global` | S `--skills`: kopíruje do `~/.claude/skills/` (dostupné ve všech projektech) |
-| `--force` | Přepíše již existující skilly |
+| `--force` | Přepíše již existující skilly (i upravený skript hooku) |
 | `-y`, `--yes` | Na všechny otázky odpoví ANO |
 | `--dry-run` | Jen vypíše příkazy, nic nespustí |
 | `-h`, `--help` / `-v`, `--version` | Nápověda / verze |
@@ -179,6 +205,7 @@ Restartujte Claude Code a v projektu spusťte:
 /plugin      → frontend-design, superpowers
 /mcp         → chrome-devtools, shadcn, 21st (stav: connected)
 /skills      → ux-laws, backend-security-auditor, frontend-design-guide, webapp-testing, …
+/hooks       → záznamy PreToolUse a PostToolUse pro slop-secrets-guard.sh
 ```
 
 ## Integrace do existujícího projektu
@@ -193,8 +220,8 @@ Restartujte Claude Code a v projektu spusťte:
 2. **Commitněte sdílené konfigurace**, aby je měl celý tým:
 
    ```bash
-   git add .claude/skills .mcp.json
-   git commit -m "chore: add claude-web-skills-toolkit skills and MCP config"
+   git add .claude/skills .claude/hooks .claude/settings.json .mcp.json
+   git commit -m "chore: add claude-web-skills-toolkit skills, hooks and MCP config"
    ```
 
    `.mcp.json` vytvořený shadcn neobsahuje tajemství. Pokud do něj přidáváte server s klíčem
@@ -224,8 +251,12 @@ Restartujte Claude Code a v projektu spusťte:
    ```markdown
    ## Standardy kvality (claude-web-skills-toolkit)
 
+   - O stacku nových projektů a velkých nových závislostech rozhoduj podle `tech-stack-advisor` a zapiš rozhodnutí do `docs/adr/`.
    - UI: řiď se skilly `frontend-design-guide` a `ux-laws`; komponenty výhradně ze shadcn registru (`shadcn-ui`).
    - Po vygenerování nebo úpravě stránky spusť audit `vercel-web-guidelines`.
+   - Texty pro uživatele piš podle `ux-writing-en` nebo `ux-writing-cs` (podle jazyka) a pak je projeď skillem `deslop-en` / `deslop-cs`. Nikdy si nevymýšlej čísla ani reference.
+   - Každá veřejná stránka má metadata podle `seo-metadata`; každá funkce pracující s osobními údaji se řídí `gdpr-privacy`.
+   - Žádné natvrdo zapsané texty pro uživatele: překlady, plurály a formátování podle `i18n-setup`.
    - Každý endpoint, server action, webhook a upload projde `backend-security-auditor` včetně Security Gate.
    - Formuláře a kritické flow ověř Playwright testy podle `webapp-testing` a testy skutečně spusť.
    - Chyby řeš podle `superpowers-debugging`: reprodukce → příčina → čistá oprava → ověření.
@@ -269,8 +300,30 @@ metadata:
 - **`triggers`** je doplňkové pole toolkitu: lidsky čitelný seznam situací pro dokumentaci
   a pro agenty/nástroje, které s ním umí pracovat. Claude Code ho ignoruje, nevadí mu.
 - Skill lze vyvolat i explicitně: *„Použij skill backend-security-auditor na app/api.“*
+  nebo jako slash příkaz: `/deslop-cs README.cs.md`.
+- **Jazykové skilly** jsou v párech (`ux-writing-en` / `ux-writing-cs`, `deslop-en` / `deslop-cs`).
+  Každý je samostatný a jeho popis říká, pro jaký jazyk je určený, takže agent vybere ten
+  správný podle jazyka textu. Instrukce všech skillů jsou anglicky; české skilly mají české příklady.
 - Umístění: `./.claude/skills/<name>/SKILL.md` (projekt, sdílené přes git) nebo
   `~/.claude/skills/<name>/SKILL.md` (osobní, všechny projekty).
+
+## Hook: slop & secrets guard
+
+Skilly jsou pravidla, která agent čte. Hook je kód, který se spustí při každé úpravě, ať si
+agent pravidla pamatuje, nebo ne. [`hooks/slop-secrets-guard.sh`](hooks/slop-secrets-guard.sh)
+registruje dvě kontroly pro nástroje `Write`, `Edit` a `MultiEdit`:
+
+| Kontrola | Událost | Co dělá |
+|----------|---------|---------|
+| `secrets` | `PreToolUse` | **Zablokuje** úpravu, pokud nový text obsahuje něco, co vypadá jako tajná hodnota: privátní klíče, tokeny AWS/GitHub/GitLab/Slack/Stripe/Google/OpenAI/Anthropic/SendGrid/npm, JWT, hesla v connection stringu, natvrdo zapsané přihlašovací údaje. Lokální `.env` soubory přeskakuje, `.env.example` kontroluje. Hodnoty nikdy nevypisuje, jen typ a maskovaný začátek. |
+| `slop` | `PostToolUse` | **Nahlásí** Claudovi anglické a české AI obraty v Markdownu, HTML, textech, UI kódu a souborech s překlady; Claude je pak přepíše podle `deslop-en` / `deslop-cs`. Jednotlivá slova kontroluje jen v textových souborech, takže identifikátory v kódu jako `unlock()` ho nespustí. |
+
+- **Falešné poplachy:** přidejte na řádek `guard:allow` (např. `<!-- guard:allow -->` nebo `// guard:allow`).
+  Soubor obsahující `slop-guard: off` kontrola AI obratů přeskočí; soubory `SKILL.md` přeskakuje vždy.
+- **Závislosti:** jen Bash, `grep` a `awk` — za běhu nepotřebuje Node.js ani `jq`.
+- **Instalace:** `./install.sh --hooks`, nebo zkopírujte skript do `.claude/hooks/` a blok `hooks`
+  z [`hooks/settings.example.json`](hooks/settings.example.json) do `.claude/settings.json`.
+- Je to pojistka, ne náhrada skenování tajných hodnot v CI (např. gitleaks, GitHub secret scanning).
 
 ## Bezpečnost toolkitu
 
@@ -280,6 +333,8 @@ metadata:
   a ukládá se jen do uživatelské konfigurace Claude Code (`~/.claude.json`), nikdy do projektu.
 - Skript nikdy nepřepisuje existující skilly bez `--force` nebo potvrzení a maže jen cílovou
   složku skillu uvnitř `.claude/skills/`.
+- `--hooks` sloučí konfiguraci s existujícím `.claude/settings.json`, nesahá na ostatní klíče,
+  ponechá zálohu `settings.json.bak` a nevalidní JSON nechá beze změny.
 - Pluginy a MCP servery mohou spouštět kód (hooky, příkazy). Instalujte jen to, čemu
   důvěřujete, a před aktualizací si projděte změny upstreamu.
 - MCP servery pracující s prohlížečem nebo webem (chrome-devtools, 21st.dev) zpracovávají
@@ -305,8 +360,11 @@ claude mcp remove chrome-devtools --scope user
 claude mcp remove 21st --scope user
 # shadcn: odstraňte záznam "shadcn" z .mcp.json projektu
 
+# Odebrání hlídacího hooku (pak smažte jeho dva záznamy z "hooks" v .claude/settings.json)
+rm .claude/hooks/slop-secrets-guard.sh
+
 # Odebrání markdown skillů z projektu
-rm -rf .claude/skills/{ux-laws,backend-security-auditor,frontend-design-guide,webapp-testing,shadcn-ui,vercel-web-guidelines,chrome-devtools,magic-animations,superpowers-debugging}
+rm -rf .claude/skills/{ux-laws,backend-security-auditor,frontend-design-guide,webapp-testing,ux-writing-en,ux-writing-cs,deslop-en,deslop-cs,tech-stack-advisor,i18n-setup,seo-metadata,gdpr-privacy,shadcn-ui,vercel-web-guidelines,chrome-devtools,magic-animations,superpowers-debugging}
 ```
 
 ## Přispívání

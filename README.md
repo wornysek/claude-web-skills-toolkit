@@ -26,6 +26,7 @@ bash ~/claude-web-skills-toolkit/install.sh --all
 - [Installation](#installation)
 - [Integrating into an existing project](#integrating-into-an-existing-project)
 - [How skills work](#how-skills-work)
+- [Slop & secrets guard hook](#slop--secrets-guard-hook)
 - [Toolkit security](#toolkit-security)
 - [Updating and uninstalling](#updating-and-uninstalling)
 - [Contributing](#contributing)
@@ -36,17 +37,20 @@ bash ~/claude-web-skills-toolkit/install.sh --all
 ## Why this toolkit
 
 AI agents can now generate a working web application in minutes. Without rules, though,
-they keep producing three kinds of problems:
+they keep producing the same kinds of problems:
 
 | Problem | What it looks like | What the toolkit does about it |
 |---------|--------------------|--------------------------------|
 | **AI slop in design** | Purple-to-pink gradients, Inter everywhere, everything centered, emoji instead of icons, no loading/empty states, components written from scratch | `frontend-design-guide` bans generic patterns and enforces design tokens, skeletons and empty states. `shadcn-ui` makes the agent take components from the registry. The official `frontend-design` plugin provides an aesthetic direction. `magic-animations` adds deliberate, performance-aware animations. |
-| **Insecure code** | Tokens in `localStorage`, missing ownership checks (IDOR), `req.body` written straight to the DB, OAuth without `state`, webhooks without signature verification, stack traces in production | `backend-security-auditor` contains strict MUST rules for auth, IDOR, validation, the database, API responses, headers and production, including ready-made secure code patterns and a final "Security Gate". |
+| **Insecure code** | Tokens in `localStorage`, missing ownership checks (IDOR), `req.body` written straight to the DB, OAuth without `state`, webhooks without signature verification, stack traces in production, API keys pasted into source files | `backend-security-auditor` contains strict MUST rules for auth, IDOR, validation, the database, API responses, headers and production, including ready-made secure code patterns and a final "Security Gate". The optional guard hook blocks secrets before they are written to a file. |
 | **Ignored UX** | Four equally prominent buttons, tiny touch targets, no feedback after a click, a form that loses its data after an error | `ux-laws` turns 20 UX laws (Hick, Fitts, Doherty < 400 ms, Peak-End…) into verifiable *Implementation Checks*. `vercel-web-guidelines` runs an automated design audit (spacing, grid, contrast). |
+| **AI slop in text** | "Unlock seamless synergy", "Something went wrong", "Submit", invented "10,000+ happy users", emoji headings, "it's not just X, it's Y" | `ux-writing-en` / `ux-writing-cs` set rules for buttons, errors, empty states, landing copy and localization; the Czech skill adds declension, plurals, *tykání / vykání* and typography. `deslop-en` / `deslop-cs` are the editing passes that remove AI writing tells without changing facts. The guard hook flags them automatically after every edit. <!-- guard:allow --> |
+| **Invisible or non-compliant** | One title for the whole site, no social previews, indexable admin and staging pages, analytics firing before consent, no way to export data or delete an account | `seo-metadata` covers titles, canonicals, OG images, sitemap, robots, hreflang and JSON-LD. `gdpr-privacy` covers data minimization, consent without dark patterns, data subject rights, retention and PII in logs. |
 
 Quality is also **verified at runtime**: `webapp-testing` generates and runs Playwright E2E
-tests, `chrome-devtools` reads errors from a real browser console, and `superpowers-debugging`
-enforces a deterministic fix process that never masks errors.
+tests, `chrome-devtools` reads errors from a real browser console, `superpowers-debugging`
+enforces a deterministic fix process that never masks errors, and the optional
+[slop & secrets guard](#slop--secrets-guard-hook) checks every file Claude writes.
 
 ## What's inside
 
@@ -58,11 +62,22 @@ claude-web-skills-toolkit/
 ├── .gitignore
 ├── .gitattributes                 # LF line endings for install.sh, even on Windows
 ├── install.sh                     # installer (interactive / --all)
+├── hooks/
+│   ├── slop-secrets-guard.sh      # Claude Code hook: blocks secrets, flags AI writing tells
+│   └── settings.example.json      # hook registration for .claude/settings.json
 └── skills/
     ├── ux-laws/                   # custom — 20 UX laws
     ├── backend-security-auditor/  # custom — backend security rules
     ├── frontend-design-guide/     # custom — anti-AI-slop UI rules
     ├── webapp-testing/            # custom — Playwright E2E
+    ├── ux-writing-en/             # custom — English UI and web copy
+    ├── ux-writing-cs/             # custom — Czech UI and web copy
+    ├── deslop-en/                 # custom — removes AI writing tells (English)
+    ├── deslop-cs/                 # custom — removes AI writing tells (Czech)
+    ├── tech-stack-advisor/        # custom — choosing a stack, recorded as an ADR
+    ├── i18n-setup/                # custom — multilingual apps: routing, messages, formatting
+    ├── seo-metadata/              # custom — technical SEO and sharing metadata
+    ├── gdpr-privacy/              # custom — GDPR and privacy engineering
     ├── shadcn-ui/                 # wrapper — shadcn MCP server
     ├── vercel-web-guidelines/     # wrapper — Vercel Labs agent skills
     ├── chrome-devtools/           # wrapper — Chrome DevTools MCP
@@ -83,6 +98,15 @@ tool itself (plugin, MCP server) is installed with `install.sh` or manually.
 | [`backend-security-auditor`](skills/backend-security-auditor/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/backend-security-auditor .claude/skills/` | API endpoint, server action, Discord OAuth, admin routes, applications, tickets, forum, upload, webhook, "is this secure?" |
 | [`frontend-design-guide`](skills/frontend-design-guide/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/frontend-design-guide .claude/skills/` | New page/component, "make it look better", fonts, colors, skeleton, empty state |
 | [`webapp-testing`](skills/webapp-testing/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/webapp-testing .claude/skills/` | "Test the form", E2E tests, validation, error messages, redirect after submission |
+| [`ux-writing-en`](skills/ux-writing-en/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/ux-writing-en .claude/skills/` | Any English user-facing text: buttons, errors, empty states, landing page, onboarding, emails |
+| [`ux-writing-cs`](skills/ux-writing-cs/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/ux-writing-cs .claude/skills/` | Any Czech user-facing text; *tykání / vykání*, declension, plurals, Czech typography |
+| [`deslop-en`](skills/deslop-en/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/deslop-en .claude/skills/` | `/deslop-en <file>`, "it sounds like AI", READMEs, docs, PR descriptions, commit messages |
+| [`deslop-cs`](skills/deslop-cs/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/deslop-cs .claude/skills/` | `/deslop-cs <file>`, Czech text that sounds like AI or like a translation |
+| [`tech-stack-advisor`](skills/tech-stack-advisor/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/tech-stack-advisor .claude/skills/` | New project, "what should I use for…", comparing frameworks, databases, auth or hosting, migrations |
+| [`i18n-setup`](skills/i18n-setup/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/i18n-setup .claude/skills/` | Adding a language, locale routing, message files, ICU plurals, formatting, language switcher, missing translations |
+| [`seo-metadata`](skills/seo-metadata/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/seo-metadata .claude/skills/` | New public page, metadata, OG images, sitemap, robots, noindex, hreflang, JSON-LD |
+| [`gdpr-privacy`](skills/gdpr-privacy/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/gdpr-privacy .claude/skills/` | Sign-up, forms with personal data, cookies, analytics, consent, account export/deletion, logging |
+| [Slop & secrets guard](hooks/slop-secrets-guard.sh) | Claude Code Hook | claude-web-skills-toolkit · MIT | `./install.sh --hooks` | Runs automatically on every Write/Edit: blocks secrets, reports AI writing tells |
 | `frontend-design` (plugin) | Official Plugin | Anthropic (P. Rajasekaran, A. Bricken) · © Anthropic PBC, Commercial ToS | `claude plugin marketplace add anthropics/claude-code`<br>`claude plugin install frontend-design@claude-code-plugins` | Building frontends with a strong aesthetic direction; complements `frontend-design-guide` |
 | [`superpowers-debugging`](skills/superpowers-debugging/SKILL.md) → `superpowers` | Official Plugin | Jesse Vincent (obra) · MIT · distributed via Anthropic's `claude-plugins-official` | `claude plugin install superpowers@claude-plugins-official` | Bug, failing test, exception, regression, "the fix didn't work" |
 | [`shadcn-ui`](skills/shadcn-ui/SKILL.md) | External MCP Server | shadcn · MIT · recommended by Colton Dean | `npx shadcn@latest mcp init --client claude` | Form, button, dialog, menu, table, select, toast — any UI component |
@@ -103,8 +127,9 @@ tool itself (plugin, MCP server) is installed with `install.sh` or manually.
 |------|-----|-------|
 | [Claude Code](https://claude.com/claude-code) | plugins, MCP server registration | `claude --version` |
 | Node.js 20+ and `npx` | shadcn, Vercel skills, chrome-devtools-mcp | `node -v`, `npx -v` |
-| Bash 3.2+ | `install.sh` (macOS, Linux, Git Bash or WSL on Windows) | `bash --version` |
+| Bash 3.2+ | `install.sh` and the guard hook (macOS, Linux, Git Bash or WSL on Windows) | `bash --version` |
 | Google Chrome | Chrome DevTools MCP | — |
+| Node.js or Python 3 | only for merging the hook into an existing `.claude/settings.json` | `node -v` / `python3 --version` |
 
 `install.sh` checks that `claude` and `npx` are available and skips, with a clear message,
 any component whose tool is missing.
@@ -140,12 +165,13 @@ On macOS/Linux you can also run the script directly (`chmod +x install.sh && ./i
 | `--plugins` | Adds the `anthropics/claude-code` marketplace and installs `frontend-design@claude-code-plugins` and `superpowers@claude-plugins-official` |
 | `--chrome` | `claude mcp add chrome-devtools --scope user npx chrome-devtools-mcp@latest` |
 | `--shadcn` | `npx shadcn@latest mcp init --client claude` (writes `.mcp.json` in the project) |
-| `--vercel` | `npx skills add vercel-labs/agent-skills` (non-interactive: `web-design-guidelines`, `react-best-practices` for Claude Code) |
+| `--vercel` | `npx skills add vercel-labs/agent-skills` (non-interactive: `web-design-guidelines`, `react-best-practices`, `writing-guidelines` for Claude Code) |
 | `--magic` | Registers the 21st.dev MCP (key from `API_KEY_21ST`, otherwise a hidden prompt; skipped without a key) |
 | `--mcp` | Shortcut for `--chrome --shadcn --magic` |
 | `--skills` | Copies `skills/*` into `./.claude/skills/` |
+| `--hooks` | Installs the slop & secrets guard into `./.claude/hooks/` and registers it in `./.claude/settings.json` (merged, with a `.bak` backup) |
 | `--global` | With `--skills`: copies into `~/.claude/skills/` (available in every project) |
-| `--force` | Overwrites skills that already exist |
+| `--force` | Overwrites skills (and a modified hook script) that already exist |
 | `-y`, `--yes` | Answers YES to all prompts |
 | `--dry-run` | Only prints the commands, runs nothing |
 | `-h`, `--help` / `-v`, `--version` | Help / version |
@@ -178,6 +204,7 @@ Restart Claude Code and run in your project:
 /plugin      → frontend-design, superpowers
 /mcp         → chrome-devtools, shadcn, 21st (status: connected)
 /skills      → ux-laws, backend-security-auditor, frontend-design-guide, webapp-testing, …
+/hooks       → PreToolUse and PostToolUse entries for slop-secrets-guard.sh
 ```
 
 ## Integrating into an existing project
@@ -192,8 +219,8 @@ Restart Claude Code and run in your project:
 2. **Commit the shared configuration** so the whole team gets it:
 
    ```bash
-   git add .claude/skills .mcp.json
-   git commit -m "chore: add claude-web-skills-toolkit skills and MCP config"
+   git add .claude/skills .claude/hooks .claude/settings.json .mcp.json
+   git commit -m "chore: add claude-web-skills-toolkit skills, hooks and MCP config"
    ```
 
    The `.mcp.json` created by shadcn contains no secrets. If you add a server that needs a key
@@ -224,8 +251,12 @@ Restart Claude Code and run in your project:
    ```markdown
    ## Quality standards (claude-web-skills-toolkit)
 
+   - New projects and major new dependencies are decided with `tech-stack-advisor` and recorded in `docs/adr/`.
    - UI: follow the `frontend-design-guide` and `ux-laws` skills; use components from the shadcn registry only (`shadcn-ui`).
    - After generating or changing a page, run the `vercel-web-guidelines` audit.
+   - Write user-facing text following `ux-writing-en` or `ux-writing-cs` (by language), then run `deslop-en` / `deslop-cs`. Never invent numbers or testimonials.
+   - Every public page gets metadata per `seo-metadata`; every feature touching personal data follows `gdpr-privacy`.
+   - No hard-coded user-facing strings: messages, plurals and formatting follow `i18n-setup`.
    - Every endpoint, server action, webhook and upload goes through `backend-security-auditor`, including the Security Gate.
    - Verify forms and critical flows with Playwright tests following `webapp-testing`, and actually run the tests.
    - Fix bugs following `superpowers-debugging`: reproduce → root cause → clean fix → verify.
@@ -271,8 +302,31 @@ metadata:
   for documentation and for agents/tools that understand it. Claude Code ignores it, which is
   harmless.
 - A skill can also be invoked explicitly: *"Use the backend-security-auditor skill on app/api."*
+  or as a slash command: `/deslop-en README.md`.
+- **Language-specific skills** come in pairs (`ux-writing-en` / `ux-writing-cs`,
+  `deslop-en` / `deslop-cs`). Each is self-contained, and its description says which language
+  it is for, so the agent picks the right one by the language of the text. All skill
+  instructions are in English; the Czech skills use Czech examples.
 - Location: `./.claude/skills/<name>/SKILL.md` (project, shared via git) or
   `~/.claude/skills/<name>/SKILL.md` (personal, all projects).
+
+## Slop & secrets guard hook
+
+Skills are rules the agent reads; a hook is code that runs on every edit, whether the
+agent remembered the rules or not. [`hooks/slop-secrets-guard.sh`](hooks/slop-secrets-guard.sh)
+registers two checks for the `Write`, `Edit` and `MultiEdit` tools:
+
+| Check | Event | What it does |
+|-------|-------|--------------|
+| `secrets` | `PreToolUse` | **Blocks** the edit if the new text contains something that looks like a secret: private keys, AWS/GitHub/GitLab/Slack/Stripe/Google/OpenAI/Anthropic/SendGrid/npm tokens, JWTs, passwords in connection strings, hard-coded credentials. Local `.env` files are skipped; `.env.example` is checked. Values are never printed, only the type and a masked preview. |
+| `slop` | `PostToolUse` | **Reports** English and Czech AI writing tells in Markdown, HTML, text, UI code and translation files back to Claude, which then rewrites them with `deslop-en` / `deslop-cs`. Single words are checked only in prose files, so code identifiers like `unlock()` don't trigger it. |
+
+- **False positives:** add `guard:allow` to the line (e.g. `<!-- guard:allow -->` or `// guard:allow`).
+  A file containing `slop-guard: off` is skipped by the slop check; `SKILL.md` files are always skipped.
+- **Dependencies:** only Bash, `grep` and `awk` — no Node.js or `jq` needed at runtime.
+- **Install:** `./install.sh --hooks`, or copy the script to `.claude/hooks/` and the `hooks`
+  block from [`hooks/settings.example.json`](hooks/settings.example.json) into `.claude/settings.json`.
+- It is a safety net, not a replacement for secret scanning in CI (e.g. gitleaks, GitHub secret scanning).
 
 ## Toolkit security
 
@@ -283,6 +337,8 @@ metadata:
   project.
 - The script never overwrites existing skills without `--force` or confirmation, and only
   deletes the target skill folder inside `.claude/skills/`.
+- `--hooks` merges into an existing `.claude/settings.json` without touching other keys, keeps a
+  `settings.json.bak` backup, and leaves the file unchanged if it isn't valid JSON.
 - Plugins and MCP servers can run code (hooks, commands). Install only what you trust and
   review upstream changes before updating.
 - MCP servers that work with a browser or the web (chrome-devtools, 21st.dev) process untrusted
@@ -308,8 +364,11 @@ claude mcp remove chrome-devtools --scope user
 claude mcp remove 21st --scope user
 # shadcn: remove the "shadcn" entry from the project's .mcp.json
 
+# Remove the guard hook (then delete its two entries from "hooks" in .claude/settings.json)
+rm .claude/hooks/slop-secrets-guard.sh
+
 # Remove the markdown skills from the project
-rm -rf .claude/skills/{ux-laws,backend-security-auditor,frontend-design-guide,webapp-testing,shadcn-ui,vercel-web-guidelines,chrome-devtools,magic-animations,superpowers-debugging}
+rm -rf .claude/skills/{ux-laws,backend-security-auditor,frontend-design-guide,webapp-testing,ux-writing-en,ux-writing-cs,deslop-en,deslop-cs,tech-stack-advisor,i18n-setup,seo-metadata,gdpr-privacy,shadcn-ui,vercel-web-guidelines,chrome-devtools,magic-animations,superpowers-debugging}
 ```
 
 ## Contributing
