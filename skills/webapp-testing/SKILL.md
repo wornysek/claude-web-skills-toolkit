@@ -1,17 +1,16 @@
 ---
 name: webapp-testing
-description: "Guide for generating and running Playwright E2E tests for a web application: form validation, error messages (422/429/500), redirect after submitting an application, double-submit protection, access by signed-out users and accessibility. Use whenever the user wants to test a form or flow, add E2E tests, verify a bug fix in the browser, or when you finish a form or application flow and need to verify that it actually works."
+description: "Guide for generating and running Playwright E2E tests for a web application: form validation, error messages (422/429/500), redirect after a successful submission, double-submit protection, access by signed-out users and accessibility. Use whenever the user wants to test a form or flow, add E2E tests, verify a bug fix in the browser, or when you finish a form or flow and need to verify that it actually works."
 triggers:
-  - "test the form / application / sign-up"
+  - "test the form / sign-up / checkout / contact form"
   - "write E2E tests / Playwright"
   - "verify validation / error messages / redirects"
-  - "does submitting the application work?"
+  - "does submitting the form work?"
   - "regression test after a bug fix"
-  - "write e2e tests / test the form"
 metadata:
   author: claude-web-skills-toolkit
   license: MIT
-  version: "1.0.0"
+  version: "1.1.0"
   tool: "@playwright/test"
 ---
 
@@ -94,25 +93,26 @@ export default defineConfig({
 
 The `playwright/.auth/` folder contains session cookies — it **must** be in `.gitignore`.
 
-## Authentication in tests (Discord OAuth)
+## Authentication in tests
 
-E2E tests **must not** go through the real Discord OAuth (rate limits, 2FA, CAPTCHA, real
-accounts). Use a test sign-in endpoint that exists **only** in test mode:
+E2E tests **must not** sign in through a real OAuth provider or a real email inbox (rate
+limits, 2FA, CAPTCHA, real accounts). Use a test sign-in endpoint that exists **only** in
+test mode:
 
 ```ts
 // app/api/test/login/route.ts — E2E only
 import { createSession } from "@/lib/session";
-import { upsertDiscordUser } from "@/lib/users";
+import { upsertTestUser } from "@/lib/users";
 
 export async function POST(req: Request) {
-  if (process.env.E2E_TEST_MODE !== "1" || process.env.VERCEL_ENV === "production") {
+  // Only the Playwright webServer sets E2E_TEST_MODE (see playwright.config.ts)
+  if (process.env.E2E_TEST_MODE !== "1") {
     return new Response(null, { status: 404 });
   }
-  const { role } = (await req.json()) as { role?: "user" | "reviewer" | "admin" };
-  const user = await upsertDiscordUser({
-    discordId: role === "admin" ? "100000000000000001" : "100000000000000002",
-    username: `e2e-${role ?? "user"}`,
-    avatar: null,
+  const { role } = (await req.json()) as { role?: "user" | "support" | "admin" };
+  const user = await upsertTestUser({
+    email: `e2e-${role ?? "user"}@example.test`,
+    name: `E2E ${role ?? "user"}`,
     role: role ?? "user",
   });
   await createSession(user.id);
@@ -134,7 +134,8 @@ setup("sign in the test user", async ({ request }) => {
 ```
 
 > Security: the endpoint returns 404 outside test mode, and `E2E_TEST_MODE` is **never**
-> set in the production environment. Verify this in review (`backend-security-auditor`).
+> set in a deployed environment. Better still, exclude the route from production builds.
+> Verify this in review (`backend-security-auditor`).
 
 ## Form test matrix
 
@@ -148,36 +149,39 @@ For every form, cover at least:
 | 4 | Server error 500 | A generic understandable message (`role="alert"`), the form data is kept |
 | 5 | Server validation error 422 | Server errors are shown on the corresponding fields |
 | 6 | Rate limit 429 | A "Please try again later" message, the button is enabled again |
-| 7 | Successful submission | Request with the expected body, status 201, redirect to the confirmation page, confirmation heading |
+| 7 | Successful submission | Request with the expected body, status 201, redirect to the result page, confirmation visible |
 | 8 | Double submission | The button is `disabled` while submitting, exactly one request reaches the API |
-| 9 | Signed-out user | Redirect to sign-in, the form is not shown |
+| 9 | Signed-out user (protected forms) | Redirect to sign-in, the form is not shown |
 | 10 | Keyboard | The form can be filled in and submitted using the keyboard only (Tab, Space, Enter) |
 
-## Reference test: whitelist application
+## Reference test: creating a support ticket
+
+The form has *Subject* (5–120 characters), *Category* (select), *Description* (at least 30
+characters) and an optional *Email me when the team replies* checkbox. After success it
+redirects to the new ticket.
 
 ```ts
-// e2e/whitelist-application.spec.ts
+// e2e/new-ticket.spec.ts
 import { test, expect, type Page } from "@playwright/test";
 
-const APPLY_URL = "/whitelist/apply";
-const API_PATTERN = "**/api/applications";
+const NEW_TICKET_URL = "/support/tickets/new";
+const API_PATTERN = "**/api/tickets";
+const TICKET_URL = /\/support\/tickets\/[0-9a-f-]{36}$/;
 
-async function fillValidApplication(page: Page) {
-  await page.getByLabel("In-game name").fill("Steve_123");
-  await page.getByLabel("Age").fill("21");
-  await page.getByLabel("Time zone").fill("Europe/Prague");
+async function fillValidTicket(page: Page) {
+  await page.getByLabel("Subject").fill("Invoice PDF is empty");
+  await page.getByLabel("Category").selectOption("billing");
   await page
-    .getByLabel("Why do you want to join?")
-    .fill("I have been playing on community servers for five years and I am looking for a long-term roleplay community.");
-  await page.getByLabel("I agree to the server rules").check();
+    .getByLabel("Description")
+    .fill("The PDF for invoice 2026-104 downloads, but every page is blank in two different viewers.");
 }
 
-const submitButton = (page: Page) => page.getByRole("button", { name: "Submit application" });
+const submitButton = (page: Page) => page.getByRole("button", { name: "Create ticket" });
 
-test.describe("Whitelist application", () => {
+test.describe("New support ticket", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(APPLY_URL);
-    await expect(page.getByRole("heading", { level: 1, name: "Whitelist application" })).toBeVisible();
+    await page.goto(NEW_TICKET_URL);
+    await expect(page.getByRole("heading", { level: 1, name: "New ticket" })).toBeVisible();
   });
 
   test("empty submission shows errors on required fields and sends no request", async ({ page }) => {
@@ -189,48 +193,48 @@ test.describe("Whitelist application", () => {
 
     await submitButton(page).click();
 
-    const name = page.getByLabel("In-game name");
-    await expect(name).toHaveAttribute("aria-invalid", "true");
-    await expect(name).toBeFocused();
-    await expect(page.getByText("3–16 characters: letters, digits, underscore")).toBeVisible();
-    await expect(page.getByLabel("Why do you want to join?")).toHaveAttribute("aria-invalid", "true");
-    await expect(page.getByLabel("I agree to the server rules")).toHaveAttribute("aria-invalid", "true");
-    await expect(page).toHaveURL(new RegExp(`${APPLY_URL}$`));
+    const subject = page.getByLabel("Subject");
+    await expect(subject).toHaveAttribute("aria-invalid", "true");
+    await expect(subject).toBeFocused();
+    await expect(page.getByText("Enter a subject of at least 5 characters.")).toBeVisible();
+    await expect(page.getByLabel("Category")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByLabel("Description")).toHaveAttribute("aria-invalid", "true");
+    await expect(page).toHaveURL(new RegExp(`${NEW_TICKET_URL}$`));
     expect(apiCalls).toBe(0);
   });
 
-  test("invalid name and short motivation show specific messages", async ({ page }) => {
-    await fillValidApplication(page);
-    await page.getByLabel("In-game name").fill("ab");
-    await page.getByLabel("Why do you want to join?").fill("I want to play.");
+  test("a short subject and description show specific messages", async ({ page }) => {
+    await fillValidTicket(page);
+    await page.getByLabel("Subject").fill("PDF");
+    await page.getByLabel("Description").fill("It is broken.");
     await submitButton(page).click();
 
-    await expect(page.getByText("3–16 characters: letters, digits, underscore")).toBeVisible();
-    await expect(page.getByText(/at least 50 characters/i)).toBeVisible();
+    await expect(page.getByText("Enter a subject of at least 5 characters.")).toBeVisible();
+    await expect(page.getByText(/at least 30 characters/i)).toBeVisible();
   });
 
   test("fixing a field removes the error message", async ({ page }) => {
     await submitButton(page).click();
-    const name = page.getByLabel("In-game name");
-    await expect(name).toHaveAttribute("aria-invalid", "true");
+    const subject = page.getByLabel("Subject");
+    await expect(subject).toHaveAttribute("aria-invalid", "true");
 
-    await name.fill("Steve_123");
-    await name.blur();
+    await subject.fill("Invoice PDF is empty");
+    await subject.blur();
 
-    await expect(name).not.toHaveAttribute("aria-invalid", "true");
-    await expect(page.getByText("3–16 characters: letters, digits, underscore")).toBeHidden();
+    await expect(subject).not.toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByText("Enter a subject of at least 5 characters.")).toBeHidden();
   });
 
   test("server error 500 shows a message and keeps the filled-in data", async ({ page }) => {
     await page.route(API_PATTERN, (route) =>
       route.fulfill({ status: 500, json: { error: "internal_error", requestId: "e2e-req-1" } }),
     );
-    await fillValidApplication(page);
+    await fillValidTicket(page);
     await submitButton(page).click();
 
-    await expect(page.getByRole("alert")).toContainText(/something went wrong/i);
+    await expect(page.getByRole("alert")).toContainText(/something went wrong|couldn't create/i);
     await expect(page.getByRole("alert")).not.toContainText(/stack|exception|prisma|sql/i);
-    await expect(page.getByLabel("In-game name")).toHaveValue("Steve_123");
+    await expect(page.getByLabel("Subject")).toHaveValue("Invoice PDF is empty");
     await expect(submitButton(page)).toBeEnabled();
   });
 
@@ -238,92 +242,92 @@ test.describe("Whitelist application", () => {
     await page.route(API_PATTERN, (route) =>
       route.fulfill({
         status: 422,
-        json: { error: "validation_error", issues: { inGameName: ["This name already has an active application"] } },
+        json: { error: "validation_error", issues: { subject: ["You already have an open ticket with this subject."] } },
       }),
     );
-    await fillValidApplication(page);
+    await fillValidTicket(page);
     await submitButton(page).click();
 
-    await expect(page.getByText("This name already has an active application")).toBeVisible();
-    await expect(page.getByLabel("In-game name")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByText("You already have an open ticket with this subject.")).toBeVisible();
+    await expect(page.getByLabel("Subject")).toHaveAttribute("aria-invalid", "true");
   });
 
   test("rate limit 429 shows an understandable message", async ({ page }) => {
     await page.route(API_PATTERN, (route) =>
       route.fulfill({ status: 429, headers: { "Retry-After": "3600" }, json: { error: "rate_limited" } }),
     );
-    await fillValidApplication(page);
+    await fillValidTicket(page);
     await submitButton(page).click();
 
     await expect(page.getByRole("alert")).toContainText(/try again later/i);
     await expect(submitButton(page)).toBeEnabled();
   });
 
-  test("successful submission sends the right data and redirects to the application status", async ({ page }) => {
-    await fillValidApplication(page);
+  test("successful submission sends the right data and opens the new ticket", async ({ page }) => {
+    await fillValidTicket(page);
 
-    const requestPromise = page.waitForRequest((r) => r.url().includes("/api/applications") && r.method() === "POST");
-    const responsePromise = page.waitForResponse((r) => r.url().includes("/api/applications") && r.request().method() === "POST");
+    const requestPromise = page.waitForRequest((r) => r.url().includes("/api/tickets") && r.method() === "POST");
+    const responsePromise = page.waitForResponse((r) => r.url().includes("/api/tickets") && r.request().method() === "POST");
     await submitButton(page).click();
 
     const request = await requestPromise;
     expect(request.postDataJSON()).toMatchObject({
-      inGameName: "Steve_123",
-      age: 21,
-      rulesAccepted: true,
+      subject: "Invoice PDF is empty",
+      category: "billing",
     });
+    // Mass assignment: the client never decides these
     expect(request.postDataJSON()).not.toHaveProperty("status");
-    expect(request.postDataJSON()).not.toHaveProperty("role");
+    expect(request.postDataJSON()).not.toHaveProperty("priority");
+    expect(request.postDataJSON()).not.toHaveProperty("authorId");
 
     const response = await responsePromise;
     expect(response.status()).toBe(201);
 
-    await expect(page).toHaveURL(/\/whitelist\/status$/);
-    await expect(page.getByRole("heading", { name: "Application submitted" })).toBeVisible();
-    await expect(page.getByText(/get back to you/i)).toBeVisible();
+    await expect(page).toHaveURL(TICKET_URL);
+    await expect(page.getByRole("heading", { level: 1, name: "Invoice PDF is empty" })).toBeVisible();
+    await expect(page.getByRole("status")).toContainText(/ticket created/i);
   });
 
-  test("double click submits the application only once", async ({ page }) => {
+  test("double click creates the ticket only once", async ({ page }) => {
     let apiCalls = 0;
     await page.route(API_PATTERN, async (route) => {
       apiCalls += 1;
       await new Promise((resolve) => setTimeout(resolve, 600));
       await route.fulfill({ status: 201, json: { id: "00000000-0000-4000-8000-000000000001" } });
     });
-    await fillValidApplication(page);
+    await fillValidTicket(page);
 
     await submitButton(page).dblclick();
-    await expect(page.getByRole("button", { name: /submitting/i })).toBeDisabled();
-    await expect(page).toHaveURL(/\/whitelist\/status$/);
+    await expect(page.getByRole("button", { name: /creating/i })).toBeDisabled();
+    await expect(page).toHaveURL(TICKET_URL);
     expect(apiCalls).toBe(1);
   });
 
   test("the form can be filled in and submitted with the keyboard only", async ({ page }) => {
     await page.route(API_PATTERN, (route) => route.fulfill({ status: 201, json: { id: "00000000-0000-4000-8000-000000000002" } }));
+    await page.getByLabel("Category").selectOption("billing"); // custom selects need their own keyboard steps
 
-    await page.getByLabel("In-game name").focus();
-    await page.keyboard.type("Steve_123");
-    await page.keyboard.press("Tab");
-    await page.keyboard.type("21");
-    await page.keyboard.press("Tab");
-    await page.keyboard.type("Europe/Prague");
-    await page.keyboard.press("Tab");
-    await page.keyboard.type("I have been playing on community servers for five years and I am looking for a long-term roleplay community.");
-    await page.keyboard.press("Tab");
+    await page.getByLabel("Subject").focus();
+    await page.keyboard.type("Invoice PDF is empty");
+    await page.keyboard.press("Tab"); // Category
+    await page.keyboard.press("Tab"); // Description
+    await page.keyboard.type("The PDF for invoice 2026-104 downloads, but every page is blank in two viewers.");
+    await page.keyboard.press("Tab"); // "Email me when the team replies"
     await page.keyboard.press("Space");
+    await page.keyboard.press("Tab"); // "Create ticket"
     await page.keyboard.press("Enter");
 
-    await expect(page).toHaveURL(/\/whitelist\/status$/);
+    await expect(page).toHaveURL(TICKET_URL);
   });
 });
 
-test.describe("Application — signed-out user", () => {
+test.describe("New ticket — signed-out user", () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
   test("is redirected to sign-in", async ({ page }) => {
-    await page.goto(APPLY_URL);
+    await page.goto(NEW_TICKET_URL);
     await expect(page).toHaveURL(/\/login(\?|$)/);
-    await expect(page.getByRole("button", { name: /sign in with discord/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /sign in/i })).toBeVisible();
   });
 });
 ```
@@ -341,7 +345,7 @@ npm install --save-dev @axe-core/playwright
 import AxeBuilder from "@axe-core/playwright";
 
 test("the form has no WCAG A/AA violations", async ({ page }) => {
-  await page.goto("/whitelist/apply");
+  await page.goto("/support/tickets/new");
   const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
   expect(results.violations).toEqual([]);
 });
@@ -353,16 +357,16 @@ test("the form has no WCAG A/AA violations", async ({ page }) => {
 - **Web-first assertions** (`await expect(locator).toBeVisible()`) that wait on their own. **Forbidden:** `page.waitForTimeout()`, manual `sleep`.
 - **Forbidden:** `click({ force: true })` — it masks real problems (an overlaid element, a disabled state).
 - Every test is **isolated** — it does not depend on the order or on data from another test.
-- External services (Discord, Stripe, email) are **mocked** via `page.route()`; tests never send real payments or messages.
+- External services (OAuth providers, payments, email) are **mocked** via `page.route()`; tests never send real payments or messages.
 - No real credentials in test code; test secrets go in `.env.test` (gitignored).
 - One test = one behavior; the test name describes the expected result.
-- Tests also verify **negative** conditions: the `role`/`status` fields were not sent to the API (mass assignment), the error message does not contain a stack trace.
+- Tests also verify **negative** conditions: fields like `status`, `role` or `priority` are not sent to the API (mass assignment), the error message does not contain a stack trace.
 
 ## Running and debugging
 
 ```bash
 npx playwright test                                   # all tests
-npx playwright test e2e/whitelist-application.spec.ts # one file
+npx playwright test e2e/new-ticket.spec.ts            # one file
 npx playwright test -g "double click"                 # by name
 npx playwright test --project=chromium --reporter=list
 npx playwright test --headed                          # visible browser
@@ -382,10 +386,10 @@ On failure:
 ## Output format
 
 ```markdown
-## E2E results: e2e/whitelist-application.spec.ts
+## E2E results: e2e/new-ticket.spec.ts
 
 - Ran: 10 tests (chromium) · ✅ 9 passed · ❌ 1 failed
-- ❌ "double click submits the application only once" — 2 requests reached the API.
-  - Cause: the button is disabled only after `fetch` returns, not on submit (app/whitelist/apply/form.tsx:58).
+- ❌ "double click creates the ticket only once" — 2 requests reached the API.
+  - Cause: the button is disabled only after `fetch` returns, not on submit (app/support/tickets/new/form.tsx:58).
   - Fix: `useTransition` + `disabled={isPending}`; after the fix 10/10 ✅, `--repeat-each=5` ✅.
 ```
