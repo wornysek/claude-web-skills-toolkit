@@ -101,7 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 - ❌ Emoji as UI icons (🚀 ✨ 🔥) — use Lucide.
 - ❌ Three identical "icon on top + heading + two lines of text" cards as the only structure of the page.
 - ❌ Everything centered (`text-center` on the whole page).
-- ❌ Lorem ipsum and generic copy ("Revolutionize your workflow") — write real content in the product's language.
+- ❌ Lorem ipsum and generic copy ("Revolutionize your workflow") — write real content in the product's language (rules in `ux-writing-en` / `ux-writing-cs`, editing pass in `deslop-en` / `deslop-cs`).
 
 A gradient is allowed if it is **intentional, subtle and on-brand** (e.g. two close shades of
 the accent, noise/grain, a radial light in the hero section) and you can explain why it is there.
