@@ -363,4 +363,4 @@ lib/
 - [ ] Animations only `transform`/`opacity`, 150–300 ms, respecting `prefers-reduced-motion`.
 - [ ] Components come from shadcn/ui, icons from Lucide with the correct ARIA attributes.
 - [ ] The layout works at 360 px and 1440 px without horizontal scrolling.
-- [ ] The `vercel-web-guidelines` audit and the `ux-laws` check have been run.
+- [ ] The `vercel-web-guidelines` audit, the `ux-laws` check and the `a11y-auditor` checks have been run; the page stays within the `web-performance` budgets.

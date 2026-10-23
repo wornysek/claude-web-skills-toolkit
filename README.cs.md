@@ -52,6 +52,10 @@ testy, `chrome-devtools` čte chyby z konzole skutečného prohlížeče, `super
 vynucuje deterministický postup oprav bez maskování chyb a volitelný
 [hlídací hook](#hook-slop--secrets-guard) kontroluje každý soubor, který Claude zapíše.
 
+Toolkit dál pokrývá zbytek webového projektu — přístupnost, výkon, formuláře, přihlašování,
+API, databáze, e-maily, AI funkce a nasazení — a skilly pro konkrétní typy webů: e-shopy,
+obsahové weby, landing page, mobil/PWA a realtime aplikace.
+
 ## Co je uvnitř
 
 ```
@@ -65,24 +69,10 @@ claude-web-skills-toolkit/
 ├── hooks/
 │   ├── slop-secrets-guard.sh      # hook pro Claude Code: blokuje tajné hodnoty, hlásí AI obraty
 │   └── settings.example.json      # registrace hooku pro .claude/settings.json
-└── skills/
-    ├── ux-laws/                   # vlastní — 20 zákonů UX
-    ├── backend-security-auditor/  # vlastní — bezpečnostní pravidla backendu
-    ├── frontend-design-guide/     # vlastní — anti-AI-slop UI pravidla
-    ├── webapp-testing/            # vlastní — Playwright E2E
-    ├── ux-writing-en/             # vlastní — anglické texty v UI a na webu
-    ├── ux-writing-cs/             # vlastní — české texty v UI a na webu
-    ├── deslop-en/                 # vlastní — odstranění AI obratů (angličtina)
-    ├── deslop-cs/                 # vlastní — odstranění AI obratů (čeština)
-    ├── tech-stack-advisor/        # vlastní — volba tech stacku, zapsaná jako ADR
-    ├── i18n-setup/                # vlastní — vícejazyčné aplikace: routing, překlady, formáty
-    ├── seo-metadata/              # vlastní — technické SEO a metadata pro sdílení
-    ├── gdpr-privacy/              # vlastní — GDPR a ochrana osobních údajů v kódu
-    ├── shadcn-ui/                 # wrapper — shadcn MCP server
-    ├── vercel-web-guidelines/     # wrapper — Vercel Labs agent skills
-    ├── chrome-devtools/           # wrapper — Chrome DevTools MCP
-    ├── magic-animations/          # wrapper — 21st.dev MCP
-    └── superpowers-debugging/     # wrapper — plugin superpowers
+└── skills/                        # 32 skillů, každý ve složce se SKILL.md (viz tabulky níže)
+    ├── a11y-auditor/
+    ├── ai-features/
+    └── …
 ```
 
 **Vlastní skilly** obsahují kompletní pravidla. **Wrapper skilly** pro externí nástroje
@@ -95,20 +85,65 @@ obsahují zdroj, autora, licenci, přesný postup instalace, JSON konfiguraci a 
 
 ## Tabulka skillů a nástrojů
 
+Všechny vlastní skilly jsou od claude-web-skills-toolkit pod licencí MIT. Jednotlivě je
+nainstalujete příkazem `cp -R skills/<název> .claude/skills/`, všechny najednou přes `./install.sh --skills`.
+
+### Design a UX
+
+| Skill | Kdy použít |
+|-------|-------------|
+| [`ux-laws`](skills/ux-laws/SKILL.md) | Návrh nebo review UI podle 20 zákonů UX; formuláře, navigace, onboarding, nízká konverze (inspirováno *Laws of UX*, Jon Yablonski) |
+| [`frontend-design-guide`](skills/frontend-design-guide/SKILL.md) | Nová stránka nebo komponenta, „udělej to hezčí“, fonty, barvy, skeletony, empty states |
+| [`a11y-auditor`](skills/a11y-auditor/SKILL.md) | Přístupnost (WCAG 2.2 AA, EAA): klávesnice, čtečky obrazovky, dialogy a vlastní widgety, prohlášení o přístupnosti |
+| [`landing-page`](skills/landing-page/SKILL.md) | Landing page, úvodní, produktové a ceníkové stránky; konverze; A/B testy |
+| [`pwa-mobile`](skills/pwa-mobile/SKILL.md) | Telefony a tablety, dotykové ovládání, manifest, offline režim, instalace, push notifikace |
+
+### Texty a obsah
+
+| Skill | Kdy použít |
+|-------|-------------|
+| [`ux-writing-en`](skills/ux-writing-en/SKILL.md) | Anglické texty v UI a na webu: tlačítka, chyby, empty states, landing page, e-maily |
+| [`ux-writing-cs`](skills/ux-writing-cs/SKILL.md) | České texty v UI a na webu: tykání a vykání, skloňování, plurály, typografie |
+| [`deslop-en`](skills/deslop-en/SKILL.md) | `/deslop-en <soubor>`, anglický text, který zní jako AI; README, dokumentace, popisy PR, commity |
+| [`deslop-cs`](skills/deslop-cs/SKILL.md) | `/deslop-cs <soubor>`, český text, který zní jako AI nebo jako překlad |
+| [`i18n-setup`](skills/i18n-setup/SKILL.md) | Druhý jazyk: routing podle jazyka, soubory s překlady, ICU plurály, formáty, přepínač jazyka |
+| [`seo-metadata`](skills/seo-metadata/SKILL.md) | Veřejné stránky: metadata, OG obrázky, sitemap, robots, noindex, hreflang, JSON-LD |
+| [`cms-content`](skills/cms-content/SKILL.md) | Blogy, dokumentace a marketingové weby: headless CMS, MDX, náhledy, redakční workflow |
+
+### Architektura a funkce
+
+| Skill | Kdy použít |
+|-------|-------------|
+| [`tech-stack-advisor`](skills/tech-stack-advisor/SKILL.md) | Nový projekt, „na čem to postavit?“, srovnání frameworků, databází, autentizace nebo hostingu |
+| [`forms`](skills/forms/SKILL.md) | Jakýkoli formulář: sdílené schéma, server actions, chyby, ochrana proti spamu, uploady |
+| [`auth-flows`](skills/auth-flows/SKILL.md) | Registrace, přihlášení, passkeys, magic linky, 2FA, reset hesla, obnova účtu |
+| [`api-design`](skills/api-design/SKILL.md) | REST endpointy a veřejná API: chyby, stránkování, verzování, idempotence, odchozí webhooky |
+| [`database-design`](skills/database-design/SKILL.md) | Schéma, relace, indexy, pomalé dotazy, bezpečné migrace, seed data |
+| [`transactional-email`](skills/transactional-email/SKILL.md) | Ověřovací, resetovací a notifikační e-maily; React Email; SPF, DKIM, DMARC |
+| [`ai-features`](skills/ai-features/SKILL.md) | Chat, asistenti, generování, RAG, prompt injection, náklady na AI |
+| [`realtime`](skills/realtime/SKILL.md) | Chat, živé aktualizace, přítomnost uživatelů, společná editace, optimistické UI |
+| [`ecommerce`](skills/ecommerce/SKILL.md) | E-shopy: košík, checkout, Stripe, předplatné, DPH v EU, spotřebitelské právo a právní stránky |
+
+### Bezpečnost a soukromí
+
+| Skill | Kdy použít |
+|-------|-------------|
+| [`backend-security-auditor`](skills/backend-security-auditor/SKILL.md) | API endpointy, server actions, kód autentizace, uploady, webhooky, „je to bezpečné?“ |
+| [`frontend-security`](skills/frontend-security/SKILL.md) | XSS, Content Security Policy, skripty třetích stran, závislosti a supply chain |
+| [`gdpr-privacy`](skills/gdpr-privacy/SKILL.md) | Osobní údaje, cookies a souhlas, analytika, export a smazání dat, doba uchovávání |
+
+### Testy, výkon a provoz
+
+| Skill | Kdy použít |
+|-------|-------------|
+| [`webapp-testing`](skills/webapp-testing/SKILL.md) | Playwright E2E testy formulářů a flow |
+| [`web-performance`](skills/web-performance/SKILL.md) | Core Web Vitals, velikost JS, obrázky, fonty, cache, Lighthouse v CI |
+| [`deploy-and-ops`](skills/deploy-and-ops/SKILL.md) | CI/CD, preview prostředí, proměnné prostředí, domény, monitoring, zálohy, incidenty |
+
+### Externí nástroje, pluginy a hook
+
 | Skill / nástroj | Typ | Původní autor · licence | Manuální instalace | Kdy použít (triggers) |
 |-----------------|-----|-------------------------|--------------------|-----------------------|
-| [`ux-laws`](skills/ux-laws/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT (inspirováno *Laws of UX*, Jon Yablonski) | `cp -R skills/ux-laws .claude/skills/` | Návrh nebo review UI, formuláře, navigace, onboarding, „UX audit“, nízká konverze |
-| [`backend-security-auditor`](skills/backend-security-auditor/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/backend-security-auditor .claude/skills/` | API endpoint, server action, přihlášení přes OAuth/OIDC, hesla, session, admin cesty, obsah od uživatelů, upload, webhook, „je to bezpečné?“ |
-| [`frontend-design-guide`](skills/frontend-design-guide/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/frontend-design-guide .claude/skills/` | Nová stránka/komponenta, „udělej to hezčí“, fonty, barvy, skeleton, empty state |
-| [`webapp-testing`](skills/webapp-testing/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/webapp-testing .claude/skills/` | „Otestuj formulář“, E2E testy, validace, chybové hlášky, přesměrování po odeslání |
-| [`ux-writing-en`](skills/ux-writing-en/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/ux-writing-en .claude/skills/` | Jakýkoli anglický text pro uživatele: tlačítka, chyby, empty states, landing page, onboarding, e-maily |
-| [`ux-writing-cs`](skills/ux-writing-cs/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/ux-writing-cs .claude/skills/` | Jakýkoli český text pro uživatele; tykání a vykání, skloňování, plurály, česká typografie |
-| [`deslop-en`](skills/deslop-en/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/deslop-en .claude/skills/` | `/deslop-en <soubor>`, „zní to jako AI“, README, dokumentace, popisy PR, commit zprávy |
-| [`deslop-cs`](skills/deslop-cs/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/deslop-cs .claude/skills/` | `/deslop-cs <soubor>`, český text, který zní jako AI nebo jako překlad |
-| [`tech-stack-advisor`](skills/tech-stack-advisor/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/tech-stack-advisor .claude/skills/` | Nový projekt, „na čem to postavit?“, srovnání frameworků, databází, autentizace nebo hostingu, migrace |
-| [`i18n-setup`](skills/i18n-setup/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/i18n-setup .claude/skills/` | Přidání jazyka, routing podle jazyka, soubory s překlady, ICU plurály, formáty, přepínač jazyka, chybějící překlady |
-| [`seo-metadata`](skills/seo-metadata/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/seo-metadata .claude/skills/` | Nová veřejná stránka, metadata, OG obrázky, sitemap, robots, noindex, hreflang, JSON-LD |
-| [`gdpr-privacy`](skills/gdpr-privacy/SKILL.md) | Vlastní Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/gdpr-privacy .claude/skills/` | Registrace, formuláře s osobními údaji, cookies, analytika, souhlas, export a smazání účtu, logování |
 | [Hlídací hook (slop & secrets guard)](hooks/slop-secrets-guard.sh) | Hook pro Claude Code | claude-web-skills-toolkit · MIT | `./install.sh --hooks` | Spouští se automaticky při každém Write/Edit: blokuje tajné hodnoty, hlásí AI obraty |
 | `frontend-design` (plugin) | Oficiální Plugin | Anthropic (P. Rajasekaran, A. Bricken) · © Anthropic PBC, Commercial ToS | `claude plugin marketplace add anthropics/claude-code`<br>`claude plugin install frontend-design@claude-code-plugins` | Tvorba frontendu s výrazným estetickým směrem; doplňuje `frontend-design-guide` |
 | [`superpowers-debugging`](skills/superpowers-debugging/SKILL.md) → `superpowers` | Oficiální Plugin | Jesse Vincent (obra) · MIT · distribuce: Anthropic `claude-plugins-official` | `claude plugin install superpowers@claude-plugins-official` | Bug, padající test, výjimka, regrese, „oprava nezabrala“ |
@@ -261,6 +296,9 @@ Restartujte Claude Code a v projektu spusťte:
    - Formuláře a kritické flow ověř Playwright testy podle `webapp-testing` a testy skutečně spusť.
    - Chyby řeš podle `superpowers-debugging`: reprodukce → příčina → čistá oprava → ověření.
    - Runtime chyby ověřuj v prohlížeči přes `chrome-devtools`.
+   - Každá změna UI projde `a11y-auditor`; stránky drží rozpočty z `web-performance`.
+   - Frontendový kód a závislosti se řídí `frontend-security`; nasazení `deploy-and-ops`.
+   - Používej odpovídající skill pro danou funkci: `forms`, `auth-flows`, `api-design`, `database-design`, `transactional-email`, `ai-features`, `realtime`, `ecommerce`, `cms-content`, `landing-page`, `pwa-mobile`.
    ```
 
 5. **Doplňte `.gitignore` projektu** o lokální a tajné soubory (inspirace v [`.gitignore`](.gitignore) toolkitu):
@@ -363,8 +401,8 @@ claude mcp remove 21st --scope user
 # Odebrání hlídacího hooku (pak smažte jeho dva záznamy z "hooks" v .claude/settings.json)
 rm .claude/hooks/slop-secrets-guard.sh
 
-# Odebrání markdown skillů z projektu
-rm -rf .claude/skills/{ux-laws,backend-security-auditor,frontend-design-guide,webapp-testing,ux-writing-en,ux-writing-cs,deslop-en,deslop-cs,tech-stack-advisor,i18n-setup,seo-metadata,gdpr-privacy,shadcn-ui,vercel-web-guidelines,chrome-devtools,magic-animations,superpowers-debugging}
+# Odebrání markdown skillů toolkitu z projektu
+for skill in ~/claude-web-skills-toolkit/skills/*/; do rm -rf ".claude/skills/$(basename "$skill")"; done
 ```
 
 ## Přispívání

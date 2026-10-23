@@ -52,6 +52,10 @@ tests, `chrome-devtools` reads errors from a real browser console, `superpowers-
 enforces a deterministic fix process that never masks errors, and the optional
 [slop & secrets guard](#slop--secrets-guard-hook) checks every file Claude writes.
 
+Beyond that, the toolkit covers the rest of a web project — accessibility, performance,
+forms, authentication, APIs, databases, email, AI features and deployment — plus skills for
+specific kinds of sites: e-shops, content sites, landing pages, mobile/PWA and realtime apps.
+
 ## What's inside
 
 ```
@@ -65,24 +69,10 @@ claude-web-skills-toolkit/
 ├── hooks/
 │   ├── slop-secrets-guard.sh      # Claude Code hook: blocks secrets, flags AI writing tells
 │   └── settings.example.json      # hook registration for .claude/settings.json
-└── skills/
-    ├── ux-laws/                   # custom — 20 UX laws
-    ├── backend-security-auditor/  # custom — backend security rules
-    ├── frontend-design-guide/     # custom — anti-AI-slop UI rules
-    ├── webapp-testing/            # custom — Playwright E2E
-    ├── ux-writing-en/             # custom — English UI and web copy
-    ├── ux-writing-cs/             # custom — Czech UI and web copy
-    ├── deslop-en/                 # custom — removes AI writing tells (English)
-    ├── deslop-cs/                 # custom — removes AI writing tells (Czech)
-    ├── tech-stack-advisor/        # custom — choosing a stack, recorded as an ADR
-    ├── i18n-setup/                # custom — multilingual apps: routing, messages, formatting
-    ├── seo-metadata/              # custom — technical SEO and sharing metadata
-    ├── gdpr-privacy/              # custom — GDPR and privacy engineering
-    ├── shadcn-ui/                 # wrapper — shadcn MCP server
-    ├── vercel-web-guidelines/     # wrapper — Vercel Labs agent skills
-    ├── chrome-devtools/           # wrapper — Chrome DevTools MCP
-    ├── magic-animations/          # wrapper — 21st.dev MCP
-    └── superpowers-debugging/     # wrapper — superpowers plugin
+└── skills/                        # 32 skills, each a folder with a SKILL.md (see the tables below)
+    ├── a11y-auditor/
+    ├── ai-features/
+    └── …
 ```
 
 **Custom skills** contain the complete rule set. **Wrapper skills** for external tools
@@ -92,20 +82,65 @@ tool itself (plugin, MCP server) is installed with `install.sh` or manually.
 
 ## Skills and tools
 
+All custom skills are by claude-web-skills-toolkit under the MIT license. Install one
+manually with `cp -R skills/<name> .claude/skills/`, or all of them with `./install.sh --skills`.
+
+### Design and UX
+
+| Skill | When to use |
+|-------|-------------|
+| [`ux-laws`](skills/ux-laws/SKILL.md) | UI design or review against 20 UX laws; forms, navigation, onboarding, low conversion (inspired by *Laws of UX*, Jon Yablonski) |
+| [`frontend-design-guide`](skills/frontend-design-guide/SKILL.md) | New page or component, "make it look better", fonts, colors, skeletons, empty states |
+| [`a11y-auditor`](skills/a11y-auditor/SKILL.md) | Accessibility (WCAG 2.2 AA, EAA): keyboard, screen readers, dialogs and custom widgets, accessibility statement |
+| [`landing-page`](skills/landing-page/SKILL.md) | Landing, home, product and pricing pages; conversion; A/B tests |
+| [`pwa-mobile`](skills/pwa-mobile/SKILL.md) | Phones and tablets, touch, manifest, offline mode, installability, push notifications |
+
+### Text and content
+
+| Skill | When to use |
+|-------|-------------|
+| [`ux-writing-en`](skills/ux-writing-en/SKILL.md) | English UI and web copy: buttons, errors, empty states, landing pages, emails |
+| [`ux-writing-cs`](skills/ux-writing-cs/SKILL.md) | Czech UI and web copy: *tykání / vykání*, declension, plurals, Czech typography |
+| [`deslop-en`](skills/deslop-en/SKILL.md) | `/deslop-en <file>`, English text that sounds like AI; READMEs, docs, PR descriptions, commits |
+| [`deslop-cs`](skills/deslop-cs/SKILL.md) | `/deslop-cs <file>`, Czech text that sounds like AI or like a translation |
+| [`i18n-setup`](skills/i18n-setup/SKILL.md) | A second language: locale routing, message files, ICU plurals, formatting, language switcher |
+| [`seo-metadata`](skills/seo-metadata/SKILL.md) | Public pages: metadata, OG images, sitemap, robots, noindex, hreflang, JSON-LD |
+| [`cms-content`](skills/cms-content/SKILL.md) | Blogs, docs and marketing sites: headless CMS, MDX, previews, editorial workflow |
+
+### Architecture and features
+
+| Skill | When to use |
+|-------|-------------|
+| [`tech-stack-advisor`](skills/tech-stack-advisor/SKILL.md) | New project, "what should I use for…", comparing frameworks, databases, auth or hosting |
+| [`forms`](skills/forms/SKILL.md) | Any form: shared schema, server actions, errors, spam protection, uploads |
+| [`auth-flows`](skills/auth-flows/SKILL.md) | Sign-up, sign-in, passkeys, magic links, 2FA, password reset, account recovery |
+| [`api-design`](skills/api-design/SKILL.md) | REST endpoints and public APIs: errors, pagination, versioning, idempotency, outgoing webhooks |
+| [`database-design`](skills/database-design/SKILL.md) | Schema, relations, indexes, slow queries, safe migrations, seed data |
+| [`transactional-email`](skills/transactional-email/SKILL.md) | Verification, reset and notification emails; React Email; SPF, DKIM, DMARC |
+| [`ai-features`](skills/ai-features/SKILL.md) | Chat, assistants, generation, RAG, prompt injection, AI costs |
+| [`realtime`](skills/realtime/SKILL.md) | Chat, live updates, presence, collaborative editing, optimistic UI |
+| [`ecommerce`](skills/ecommerce/SKILL.md) | Shops: cart, checkout, Stripe, subscriptions, EU VAT, consumer law and legal pages |
+
+### Security and privacy
+
+| Skill | When to use |
+|-------|-------------|
+| [`backend-security-auditor`](skills/backend-security-auditor/SKILL.md) | API endpoints, server actions, auth code, uploads, webhooks, "is this secure?" |
+| [`frontend-security`](skills/frontend-security/SKILL.md) | XSS, Content Security Policy, third-party scripts, dependencies and supply chain |
+| [`gdpr-privacy`](skills/gdpr-privacy/SKILL.md) | Personal data, cookies and consent, analytics, data export and deletion, retention |
+
+### Testing, performance and operations
+
+| Skill | When to use |
+|-------|-------------|
+| [`webapp-testing`](skills/webapp-testing/SKILL.md) | Playwright E2E tests for forms and flows |
+| [`web-performance`](skills/web-performance/SKILL.md) | Core Web Vitals, bundle size, images, fonts, caching, Lighthouse CI |
+| [`deploy-and-ops`](skills/deploy-and-ops/SKILL.md) | CI/CD, previews, environments, domains, monitoring, backups, incidents |
+
+### External tools, plugins and the hook
+
 | Skill / tool | Type | Original author · license | Manual installation | When to use (triggers) |
 |--------------|------|---------------------------|---------------------|------------------------|
-| [`ux-laws`](skills/ux-laws/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT (inspired by *Laws of UX*, Jon Yablonski) | `cp -R skills/ux-laws .claude/skills/` | UI design or review, forms, navigation, onboarding, "UX audit", low conversion |
-| [`backend-security-auditor`](skills/backend-security-auditor/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/backend-security-auditor .claude/skills/` | API endpoint, server action, OAuth/OIDC sign-in, passwords, sessions, admin routes, user-generated content, upload, webhook, "is this secure?" |
-| [`frontend-design-guide`](skills/frontend-design-guide/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/frontend-design-guide .claude/skills/` | New page/component, "make it look better", fonts, colors, skeleton, empty state |
-| [`webapp-testing`](skills/webapp-testing/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/webapp-testing .claude/skills/` | "Test the form", E2E tests, validation, error messages, redirect after submission |
-| [`ux-writing-en`](skills/ux-writing-en/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/ux-writing-en .claude/skills/` | Any English user-facing text: buttons, errors, empty states, landing page, onboarding, emails |
-| [`ux-writing-cs`](skills/ux-writing-cs/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/ux-writing-cs .claude/skills/` | Any Czech user-facing text; *tykání / vykání*, declension, plurals, Czech typography |
-| [`deslop-en`](skills/deslop-en/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/deslop-en .claude/skills/` | `/deslop-en <file>`, "it sounds like AI", READMEs, docs, PR descriptions, commit messages |
-| [`deslop-cs`](skills/deslop-cs/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/deslop-cs .claude/skills/` | `/deslop-cs <file>`, Czech text that sounds like AI or like a translation |
-| [`tech-stack-advisor`](skills/tech-stack-advisor/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/tech-stack-advisor .claude/skills/` | New project, "what should I use for…", comparing frameworks, databases, auth or hosting, migrations |
-| [`i18n-setup`](skills/i18n-setup/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/i18n-setup .claude/skills/` | Adding a language, locale routing, message files, ICU plurals, formatting, language switcher, missing translations |
-| [`seo-metadata`](skills/seo-metadata/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/seo-metadata .claude/skills/` | New public page, metadata, OG images, sitemap, robots, noindex, hreflang, JSON-LD |
-| [`gdpr-privacy`](skills/gdpr-privacy/SKILL.md) | Custom Markdown skill | claude-web-skills-toolkit · MIT | `cp -R skills/gdpr-privacy .claude/skills/` | Sign-up, forms with personal data, cookies, analytics, consent, account export/deletion, logging |
 | [Slop & secrets guard](hooks/slop-secrets-guard.sh) | Claude Code Hook | claude-web-skills-toolkit · MIT | `./install.sh --hooks` | Runs automatically on every Write/Edit: blocks secrets, reports AI writing tells |
 | `frontend-design` (plugin) | Official Plugin | Anthropic (P. Rajasekaran, A. Bricken) · © Anthropic PBC, Commercial ToS | `claude plugin marketplace add anthropics/claude-code`<br>`claude plugin install frontend-design@claude-code-plugins` | Building frontends with a strong aesthetic direction; complements `frontend-design-guide` |
 | [`superpowers-debugging`](skills/superpowers-debugging/SKILL.md) → `superpowers` | Official Plugin | Jesse Vincent (obra) · MIT · distributed via Anthropic's `claude-plugins-official` | `claude plugin install superpowers@claude-plugins-official` | Bug, failing test, exception, regression, "the fix didn't work" |
@@ -261,6 +296,9 @@ Restart Claude Code and run in your project:
    - Verify forms and critical flows with Playwright tests following `webapp-testing`, and actually run the tests.
    - Fix bugs following `superpowers-debugging`: reproduce → root cause → clean fix → verify.
    - Verify runtime errors in the browser with `chrome-devtools`.
+   - Every UI change passes `a11y-auditor`; pages stay within the `web-performance` budgets.
+   - Frontend code and dependencies follow `frontend-security`; releases follow `deploy-and-ops`.
+   - Use the matching feature skill: `forms`, `auth-flows`, `api-design`, `database-design`, `transactional-email`, `ai-features`, `realtime`, `ecommerce`, `cms-content`, `landing-page`, `pwa-mobile`.
    ```
 
 5. **Extend the project's `.gitignore`** with local and secret files (see the toolkit's
@@ -367,8 +405,8 @@ claude mcp remove 21st --scope user
 # Remove the guard hook (then delete its two entries from "hooks" in .claude/settings.json)
 rm .claude/hooks/slop-secrets-guard.sh
 
-# Remove the markdown skills from the project
-rm -rf .claude/skills/{ux-laws,backend-security-auditor,frontend-design-guide,webapp-testing,ux-writing-en,ux-writing-cs,deslop-en,deslop-cs,tech-stack-advisor,i18n-setup,seo-metadata,gdpr-privacy,shadcn-ui,vercel-web-guidelines,chrome-devtools,magic-animations,superpowers-debugging}
+# Remove the toolkit's markdown skills from the project
+for skill in ~/claude-web-skills-toolkit/skills/*/; do rm -rf ".claude/skills/$(basename "$skill")"; done
 ```
 
 ## Contributing

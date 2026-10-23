@@ -280,7 +280,7 @@ export function JsonLd({ data }: { data: WithContext<Thing> }) {
 - **Semantic structure:** one `<h1>`, ordered headings, `<main>`, `<nav>`, `<article>`, real `<a href>` links (not `onClick` navigation).
 - **Descriptive link text** and internal links between related pages.
 - **Images:** meaningful `alt`, explicit `width`/`height` (or `next/image`), modern formats, lazy loading below the fold.
-- **Performance is part of SEO:** Core Web Vitals (LCP < 2.5 s, INP < 200 ms, CLS < 0.1) — see `ux-laws` (Doherty) and `chrome-devtools`.
+- **Performance is part of SEO:** Core Web Vitals (LCP < 2.5 s, INP < 200 ms, CLS < 0.1) — see `web-performance`.
 
 ## 9. URLs, status codes and redirects
 

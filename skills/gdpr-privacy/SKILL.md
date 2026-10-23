@@ -265,3 +265,4 @@ Sentry.init({
 - `ux-writing-en` / `ux-writing-cs` — clear consent texts, banner copy and form explanations (no dark patterns in wording either).
 - `ux-laws` — Hick and Von Restorff: "Reject" must not be visually hidden behind a highlighted "Accept".
 - `seo-metadata` — noindex for account, export and settings pages.
+- `ecommerce` — legal pages and consumer law for shops; `deploy-and-ops` — logs, backups and breach runbook.

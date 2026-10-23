@@ -337,6 +337,8 @@ test.describe("New ticket — signed-out user", () => {
 
 ## Optional: automated accessibility check
 
+Automated checks find only part of the problems; the full audit is in `a11y-auditor`.
+
 ```bash
 npm install --save-dev @axe-core/playwright
 ```

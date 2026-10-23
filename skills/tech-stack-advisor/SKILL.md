@@ -202,4 +202,4 @@ Finally, offer the official scaffold command for the chosen framework (e.g. `npx
 - Flag one-way doors and costs clearly.
 - Prefer boring, well-documented technology; spend novelty only where it gives the product a real advantage.
 - Verify versions and status (section 5) — say what you could not verify.
-- Related skills: `backend-security-auditor` (auth and data choices), `gdpr-privacy` (regions, processors), `seo-metadata` (rendering strategy), `i18n-setup` (multilingual routing), `frontend-design-guide` and `shadcn-ui` (UI layer).
+- Related skills: `database-design`, `auth-flows`, `deploy-and-ops`, `ecommerce`, `cms-content`, `realtime`, `ai-features` (per-area decisions), `backend-security-auditor` (auth and data choices), `gdpr-privacy` (regions, processors), `seo-metadata` (rendering strategy), `i18n-setup` (multilingual routing), `frontend-design-guide` and `shadcn-ui` (UI layer).

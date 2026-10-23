@@ -985,4 +985,4 @@ Severity:
 - If the user requests a dangerous pattern (token in `localStorage`), explain the risk in one sentence and implement the secure variant; implement the dangerous one only on an explicit repeated request, with a `// SECURITY:` comment in the code.
 - Do not invent library APIs — when unsure, check the documentation of the current version.
 - Always accompany security fixes with a test (unit or E2E via `webapp-testing`).
-- Related skills: `gdpr-privacy` (personal data, retention, processors), `webapp-testing` (regression tests), `tech-stack-advisor` (choosing an auth library or provider).
+- Related skills: `auth-flows` (designing sign-in, recovery and 2FA flows), `frontend-security` (client side and dependencies), `api-design`, `database-design`, `gdpr-privacy` (personal data, retention, processors), `webapp-testing` (regression tests), `tech-stack-advisor` (choosing an auth library or provider).

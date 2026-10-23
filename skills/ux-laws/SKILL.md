@@ -385,4 +385,4 @@ Severity:
 - Never deliver UI without checking laws 3 (Fitts), 6 (Doherty), 10 (Visual Hierarchy) and 20 (Feedback Loops) — they apply to every screen.
 - Fix the findings in the code; a report without a fix is only half the job.
 - If a rule conflicts with the user's request (e.g. they explicitly want 3 primary buttons), fulfill the request and point out the conflict in one sentence.
-- Combine with `frontend-design-guide` (visual quality) and `vercel-web-guidelines` (automated audit).
+- Combine with `frontend-design-guide` (visual quality), `vercel-web-guidelines` (automated audit) and `a11y-auditor` (WCAG conformance).
