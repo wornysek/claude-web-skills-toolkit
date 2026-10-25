@@ -1,13 +1,12 @@
 ---
 name: magic-animations
-description: "Enriching static pages with interactive hero sections, dynamic backgrounds and button animations using the 21st.dev MCP (formerly Magic MCP): finding components in the 21st.dev registry, adapting them to the project's tokens, and integrating them with respect to performance (Core Web Vitals) and accessibility (prefers-reduced-motion). Use when the user wants to 'bring a page to life', add animations, an eye-catching hero section, an animated background, shimmer/glow buttons or inspiration from 21st.dev."
+description: "Using the 21st.dev MCP (formerly Magic MCP) — search, get_component, inspiration, AI generation, logos — and the toolkit's motion rules for any animated component: performance (transform/opacity, lazy heavy backgrounds, LCP never waits for animation), accessibility (prefers-reduced-motion, no flashing, pausable motion) and code review of downloaded components. Use when the user mentions 21st.dev, Magic MCP or /ui, or when you add motion — animated backgrounds, text effects, scroll or hover animations — to a page. Which pattern and component a section should use, from 21st.dev or other registries, is decided with component-registries."
 triggers:
-  - "bring the page to life / add animations"
-  - "eye-catching / interactive hero section"
-  - "animated / dynamic background (aurora, particles, grid, beams)"
-  - "button animations / shimmer / hover effect"
-  - "component from 21st.dev / Magic MCP / /ui"
-  - "landing page that looks wow"
+  - "21st.dev / Magic MCP / /ui / 21st component"
+  - "add animations / motion / bring the page to life"
+  - "animated background / text effect / scroll animation"
+  - "button animation / shimmer / hover effect"
+  - "reduced motion / animation performance"
 metadata:
   type: external-mcp-server
   author: "21st.dev"
@@ -111,20 +110,15 @@ The server still translates the legacy tool names (`21st_magic_component_builder
 
 ## Behavior rules
 
-### When and where to add animations
-Animations must have a purpose: guide attention to the CTA, explain a state change or
-create an on-brand first impression. Candidates:
-
-| Place | Suitable effect | Query for `search` |
-|-------|-----------------|--------------------|
-| Hero section | staggered heading reveal, animated mockup, spotlight | `animated hero section`, `spotlight hero` |
-| Hero / section background | aurora, gradient mesh, dot/grid pattern, beams, particles | `aurora background`, `animated grid background` |
-| Primary CTA | shimmer, border beam, magnetic hover | `shimmer button`, `border beam button` |
-| Feature section | bento grid with hover effects, animated icons | `bento grid`, `feature cards hover` |
-| Social proof | logo / testimonial marquee | `logo marquee` |
+### When and where to add motion
+Motion must have a purpose: guide attention to the CTA, explain a state change or
+create an on-brand first impression. **Which pattern and which component** a section gets —
+from 21st.dev or another registry — is decided with `component-registries` (pattern menu,
+signature moment, registry catalog). This skill covers getting components from 21st.dev
+and the rules every animated component must meet.
 
 ### Process
-1. **Identify candidates** on the static page (max. 1 "hero" effect + 1 background + CTA micro-animations).
+1. **Take the section plan** from `component-registries` (max. one signature effect, one background, CTA micro-animations).
 2. `search` → pick 2–3 variants and show them to the user with a short justification, or choose the most suitable one based on the aesthetic direction (`frontend-design-guide`).
 3. `get_component` → download the code. If `get_usage` reports an exhausted limit or disabled AI, do not repeat the call — use the `search` results as inspiration and implement it yourself on top of shadcn/ui.
 4. **Review the code** before inserting it (see Security).

@@ -27,9 +27,9 @@ aesthetic direction; this file covers **concrete implementation standards** and 
 
 ## Process
 
-1. **Choose an aesthetic direction** and write it down in one sentence before any code (e.g. "Technical, dense, monochrome with one sharp green accent, inspired by a terminal"). Do not start without a direction.
+1. **Choose an aesthetic direction** and write it down in one sentence before any code (with Impeccable installed, record it in `DESIGN.md` — `impeccable-workflow`) (e.g. "Technical, dense, monochrome with one sharp green accent, inspired by a terminal"). Do not start without a direction.
 2. **Set up tokens** (colors, fonts, radius, shadows) in CSS variables — not ad hoc in components.
-3. **Build components** from shadcn/ui (see the `shadcn-ui` skill), styled through tokens.
+3. **Build components** from shadcn/ui (see the `shadcn-ui` skill), styled through tokens; for distinctive sections pick patterns and registry components with `component-registries`.
 4. **Implement all states** (loading, empty, error, success, disabled) — not just ideal data.
 5. **Go through the checklist** at the end of this file and run the `vercel-web-guidelines` audit.
 
@@ -98,7 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 - ❌ Glassmorphism (`backdrop-blur` + translucent white cards) as the main style of all surfaces.
 - ❌ Neon shadows (`shadow-purple-500/50`) and a "glow" on every button.
 - ❌ Emoji as UI icons (🚀 ✨ 🔥) — use Lucide.
-- ❌ Three identical "icon on top + heading + two lines of text" cards as the only structure of the page.
+- ❌ Three identical "icon on top + heading + two lines of text" cards as the only structure of the page (alternatives: the pattern menu in `component-registries`).
 - ❌ Everything centered (`text-center` on the whole page).
 - ❌ Lorem ipsum and generic copy ("Revolutionize your workflow") — write real content in the product's language (rules in `ux-writing-en` / `ux-writing-cs`, editing pass in `deslop-en` / `deslop-cs`).
 

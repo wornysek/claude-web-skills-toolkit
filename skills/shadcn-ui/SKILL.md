@@ -132,7 +132,8 @@ The private registry token is read from an environment variable — never write 
    `npx shadcn@latest search @shadcn -q "<query>"`, `npx shadcn@latest view @shadcn/<item>`,
    `npx shadcn@latest add <item>`. A custom implementation is acceptable only when the registry
    demonstrably does not contain the component — and you must say so explicitly.
-6. **Registry security:** before installing components from third-party registries, review them (`view_items_in_registries`) — look for network calls, `dangerouslySetInnerHTML`, `eval`, external scripts and unexpected dependencies.
+6. **Primitives vs. sections:** this skill covers the `@shadcn` primitives (buttons, dialogs, forms, tables, menus). Marketing sections, effects and complex app components from community registries (`@magicui`, `@aceternity`, `@react-bits`, …) are chosen with `component-registries` and installed with the same CLI and MCP.
+7. **Registry security:** before installing components from third-party registries, review them (`view_items_in_registries`) — look for network calls, `dangerouslySetInnerHTML`, `eval`, external scripts and unexpected dependencies.
 
 ## Mapping requests to components
 

@@ -23,7 +23,7 @@ experiments**; the words come from `ux-writing-*`, the look from `frontend-desig
 
 1. **Define the page:** audience, where they come from (ad, search, email, social), the one primary action and its success metric.
 2. **Outline the sections** by what this visitor needs to believe before acting (section 2).
-3. **Write the copy** (`ux-writing-en` / `ux-writing-cs`, then `deslop-*`) and design it (`frontend-design-guide`, `shadcn-ui`, optional `magic-animations`).
+3. **Write the copy** (`ux-writing-en` / `ux-writing-cs`, then `deslop-*`) and design it: a pattern and components per section from `component-registries`, tokens from `frontend-design-guide`, primitives from `shadcn-ui`, motion rules from `magic-animations`, the design loop from `impeccable-workflow`.
 4. **Build it fast and accessible** (`web-performance`, `a11y-auditor`), with metadata (`seo-metadata`).
 5. **Measure** the primary conversion with consent (section 5); **experiment** only with a hypothesis (section 6).
 
@@ -37,7 +37,7 @@ experiments**; the words come from `ux-writing-*`, the look from `frontend-desig
 
 ## 2. Structure
 
-Not every page needs every section — pick by how much convincing the visitor needs.
+Not every page needs every section — pick by how much convincing the visitor needs. How each section looks (pattern, components) is chosen with `component-registries`.
 
 | # | Section | Purpose | Notes |
 |---|---------|---------|-------|
