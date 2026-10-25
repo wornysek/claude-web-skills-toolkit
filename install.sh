@@ -41,6 +41,7 @@ DO_VERCEL=0
 DO_MAGIC=0
 DO_SKILLS=0
 DO_HOOKS=0
+DO_IMPECCABLE=0
 SKILLS_GLOBAL=0
 FORCE=0
 DRY_RUN=0
@@ -170,6 +171,7 @@ ${C_BOLD}COMPONENTS${C_RESET}
   --mcp             Shortcut for --chrome --shadcn --magic
   --skills          Copy the markdown skills into ./.claude/skills
   --hooks           Slop & secrets guard hook (./.claude/hooks + ./.claude/settings.json)
+  --impeccable      Impeccable design skill by Paul Bakaus (npx impeccable install)
 
 ${C_BOLD}MODIFIERS${C_RESET}
   --global          Copy skills into ~/.claude/skills instead of ./.claude/skills
@@ -204,7 +206,7 @@ parse_args() {
   while (( $# > 0 )); do
     case "$1" in
       --all)
-        DO_PLUGINS=1; DO_CHROME=1; DO_SHADCN=1; DO_VERCEL=1; DO_MAGIC=1; DO_SKILLS=1; DO_HOOKS=1
+        DO_PLUGINS=1; DO_CHROME=1; DO_SHADCN=1; DO_VERCEL=1; DO_MAGIC=1; DO_SKILLS=1; DO_HOOKS=1; DO_IMPECCABLE=1
         ASSUME_YES=1
         ;;
       --plugins) DO_PLUGINS=1 ;;
@@ -215,6 +217,7 @@ parse_args() {
       --mcp)     DO_CHROME=1; DO_SHADCN=1; DO_MAGIC=1 ;;
       --skills)  DO_SKILLS=1 ;;
       --hooks)   DO_HOOKS=1 ;;
+      --impeccable) DO_IMPECCABLE=1 ;;
       --global)  SKILLS_GLOBAL=1 ;;
       --force)   FORCE=1 ;;
       -y|--yes)  ASSUME_YES=1 ;;
@@ -238,7 +241,7 @@ parse_args() {
   done
 
   # Modifiers alone (e.g. just --dry-run) without a component => interactive menu.
-  if (( DO_PLUGINS + DO_CHROME + DO_SHADCN + DO_VERCEL + DO_MAGIC + DO_SKILLS + DO_HOOKS == 0 )); then
+  if (( DO_PLUGINS + DO_CHROME + DO_SHADCN + DO_VERCEL + DO_MAGIC + DO_SKILLS + DO_HOOKS + DO_IMPECCABLE == 0 )); then
     INTERACTIVE=1
   fi
 }
@@ -264,6 +267,7 @@ interactive_menu() {
   5) MCP: 21st.dev            interactive UI components and animations (API key)
   6) Markdown skills          copy skills/* into ./.claude/skills
   7) Hook: guard              blocks secrets, flags AI writing tells (.claude/settings.json)
+  8) Impeccable               design commands: shape, critique, audit, polish (Paul Bakaus)
   a) All
   q) Quit
 EOF
@@ -282,13 +286,14 @@ EOF
       5) DO_MAGIC=1 ;;
       6) DO_SKILLS=1 ;;
       7) DO_HOOKS=1 ;;
-      a|A) DO_PLUGINS=1; DO_CHROME=1; DO_SHADCN=1; DO_VERCEL=1; DO_MAGIC=1; DO_SKILLS=1; DO_HOOKS=1 ;;
+      8) DO_IMPECCABLE=1 ;;
+      a|A) DO_PLUGINS=1; DO_CHROME=1; DO_SHADCN=1; DO_VERCEL=1; DO_MAGIC=1; DO_SKILLS=1; DO_HOOKS=1; DO_IMPECCABLE=1 ;;
       q|Q) info "Exited without changes."; exit 0 ;;
       *) warn "Unknown choice '${token}' — ignoring." ;;
     esac
   done
 
-  if (( DO_PLUGINS + DO_CHROME + DO_SHADCN + DO_VERCEL + DO_MAGIC + DO_SKILLS + DO_HOOKS == 0 )); then
+  if (( DO_PLUGINS + DO_CHROME + DO_SHADCN + DO_VERCEL + DO_MAGIC + DO_SKILLS + DO_HOOKS + DO_IMPECCABLE == 0 )); then
     info "Nothing selected, exiting."
     exit 0
   fi
@@ -766,6 +771,42 @@ install_hooks() {
 }
 
 # =============================================================================
+#  8) Impeccable
+# =============================================================================
+
+install_impeccable() {
+  section "8) Impeccable design skill"
+
+  if ! require "Impeccable" npx; then
+    mark_fail "Impeccable (npx missing)"
+    return 0
+  fi
+
+  if [[ -f "${PROJECT_DIR}/.claude/skills/impeccable/SKILL.md" ]]; then
+    ok "Impeccable is already installed in this project (update with: npx impeccable update)."
+    mark_skip "Impeccable (already installed)"
+    return 0
+  fi
+
+  # The installer adds the impeccable skill and a project hook; its engine binary is
+  # downloaded on first use into ~/.impeccable/bin. Review upstream before installing.
+  local status=0
+  if (( INTERACTIVE && ! ASSUME_YES )); then
+    run npx --yes impeccable install || status=$?
+  else
+    run npx --yes impeccable install --providers=claude --scope=project || status=$?
+  fi
+
+  if (( status == 0 )); then
+    ok "Impeccable installed. Next: run /impeccable init inside Claude Code."
+    mark_ok "Impeccable"
+  else
+    err "Installing Impeccable failed (exit ${status})."
+    mark_fail "Impeccable"
+  fi
+}
+
+# =============================================================================
 #  Summary
 # =============================================================================
 
@@ -820,6 +861,7 @@ main() {
   if (( DO_MAGIC ));   then install_magic;           fi
   if (( DO_SKILLS ));  then copy_skills;             fi
   if (( DO_HOOKS ));   then install_hooks;           fi
+  if (( DO_IMPECCABLE )); then install_impeccable;   fi
 
   if print_summary; then
     printf '\n'
