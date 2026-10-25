@@ -41,7 +41,7 @@ they keep producing the same kinds of problems:
 
 | Problem | What it looks like | What the toolkit does about it |
 |---------|--------------------|--------------------------------|
-| **AI slop in design** | Purple-to-pink gradients, Inter everywhere, everything centered, emoji instead of icons, no loading/empty states, components written from scratch | `frontend-design-guide` bans generic patterns and enforces design tokens, skeletons and empty states. `shadcn-ui` makes the agent take components from the registry. The official `frontend-design` plugin provides an aesthetic direction. `magic-animations` adds deliberate, performance-aware animations. |
+| **AI slop in design** | Purple-to-pink gradients, Inter everywhere, everything centered, emoji instead of icons, no loading/empty states, components written from scratch | `frontend-design-guide` bans generic patterns and enforces design tokens, skeletons and empty states. `shadcn-ui` makes the agent take components from the registry. The official `frontend-design` plugin provides an aesthetic direction. `magic-animations` adds deliberate, performance-aware animations. `component-registries` builds each section from a deliberate pattern and proven community components instead of the same defaults; Impeccable (`impeccable-workflow`) adds shape, critique, audit and polish commands. |
 | **Insecure code** | Tokens in `localStorage`, missing ownership checks (IDOR), `req.body` written straight to the DB, OAuth without `state`, webhooks without signature verification, stack traces in production, API keys pasted into source files | `backend-security-auditor` contains strict MUST rules for auth, IDOR, validation, the database, API responses, headers and production, including ready-made secure code patterns and a final "Security Gate". The optional guard hook blocks secrets before they are written to a file. |
 | **Ignored UX** | Four equally prominent buttons, tiny touch targets, no feedback after a click, a form that loses its data after an error | `ux-laws` turns 20 UX laws (Hick, Fitts, Doherty < 400 ms, Peak-End…) into verifiable *Implementation Checks*. `vercel-web-guidelines` runs an automated design audit (spacing, grid, contrast). |
 | **AI slop in text** | "Unlock seamless synergy", "Something went wrong", "Submit", invented "10,000+ happy users", emoji headings, "it's not just X, it's Y" | `ux-writing-en` / `ux-writing-cs` set rules for buttons, errors, empty states, landing copy and localization; the Czech skill adds declension, plurals, *tykání / vykání* and typography. `deslop-en` / `deslop-cs` are the editing passes that remove AI writing tells without changing facts. The guard hook flags them automatically after every edit. <!-- guard:allow --> |
@@ -69,7 +69,7 @@ claude-web-skills-toolkit/
 ├── hooks/
 │   ├── slop-secrets-guard.sh      # Claude Code hook: blocks secrets, flags AI writing tells
 │   └── settings.example.json      # hook registration for .claude/settings.json
-└── skills/                        # 32 skills, each a folder with a SKILL.md (see the tables below)
+└── skills/                        # 34 skills, each a folder with a SKILL.md (see the tables below)
     ├── a11y-auditor/
     ├── ai-features/
     └── …
@@ -91,6 +91,7 @@ manually with `cp -R skills/<name> .claude/skills/`, or all of them with `./inst
 |-------|-------------|
 | [`ux-laws`](skills/ux-laws/SKILL.md) | UI design or review against 20 UX laws; forms, navigation, onboarding, low conversion (inspired by *Laws of UX*, Jon Yablonski) |
 | [`frontend-design-guide`](skills/frontend-design-guide/SKILL.md) | New page or component, "make it look better", fonts, colors, skeletons, empty states |
+| [`component-registries`](skills/component-registries/SKILL.md) | Pages that look like every other site: a pattern menu per section, components from Magic UI, Aceternity, React Bits, 21st.dev and other registries |
 | [`a11y-auditor`](skills/a11y-auditor/SKILL.md) | Accessibility (WCAG 2.2 AA, EAA): keyboard, screen readers, dialogs and custom widgets, accessibility statement |
 | [`landing-page`](skills/landing-page/SKILL.md) | Landing, home, product and pricing pages; conversion; A/B tests |
 | [`pwa-mobile`](skills/pwa-mobile/SKILL.md) | Phones and tablets, touch, manifest, offline mode, installability, push notifications |
@@ -148,6 +149,7 @@ manually with `cp -R skills/<name> .claude/skills/`, or all of them with `./inst
 | [`vercel-web-guidelines`](skills/vercel-web-guidelines/SKILL.md) | External Agent Skill | Vercel Labs · MIT | `npx skills add vercel-labs/agent-skills` | After generating a page; "review my UI", "audit design", spacing, grid, contrast |
 | [`chrome-devtools`](skills/chrome-devtools/SKILL.md) | External MCP Server | Google Chrome DevTools team · Apache-2.0 | `claude mcp add chrome-devtools --scope user npx chrome-devtools-mcp@latest` | Page is broken, console errors, failed requests, screenshots, performance (LCP/CLS/INP) |
 | [`magic-animations`](skills/magic-animations/SKILL.md) | External MCP Server | 21st.dev · ISC (magic-mcp) / MIT (CLI) · commercial service with an API key | `npx @21st-dev/cli@latest init --client claude --write`<br>or `claude mcp add --transport http --scope user 21st https://21st.dev/api/mcp --header "x-api-key: $API_KEY_21ST"` | Interactive hero sections, animated backgrounds, button animations, "bring the page to life" |
+| [`impeccable-workflow`](skills/impeccable-workflow/SKILL.md) → `impeccable` | External Agent Skill | Paul Bakaus · Apache-2.0 | `npx impeccable install` | Design process: shape, critique, audit, polish, bolder/quieter; designs that look generic |
 
 > **Note on 21st.dev:** upstream has replaced Magic MCP with the unified 21st MCP, and old
 > API keys have been revoked. The previously documented command
@@ -205,6 +207,7 @@ On macOS/Linux you can also run the script directly (`chmod +x install.sh && ./i
 | `--mcp` | Shortcut for `--chrome --shadcn --magic` |
 | `--skills` | Copies `skills/*` into `./.claude/skills/` |
 | `--hooks` | Installs the slop & secrets guard into `./.claude/hooks/` and registers it in `./.claude/settings.json` (merged, with a `.bak` backup) |
+| `--impeccable` | Installs Impeccable for Claude Code in the project (`npx impeccable install --providers=claude --scope=project`); then run `/impeccable init` |
 | `--global` | With `--skills`: copies into `~/.claude/skills/` (available in every project) |
 | `--force` | Overwrites skills (and a modified hook script) that already exist |
 | `-y`, `--yes` | Answers YES to all prompts |
@@ -238,7 +241,7 @@ Restart Claude Code and run in your project:
 ```text
 /plugin      → frontend-design, superpowers
 /mcp         → chrome-devtools, shadcn, 21st (status: connected)
-/skills      → ux-laws, backend-security-auditor, frontend-design-guide, webapp-testing, …
+/skills      → ux-laws, backend-security-auditor, frontend-design-guide, webapp-testing, impeccable, …
 /hooks       → PreToolUse and PostToolUse entries for slop-secrets-guard.sh
 ```
 
@@ -296,6 +299,7 @@ Restart Claude Code and run in your project:
    - Verify forms and critical flows with Playwright tests following `webapp-testing`, and actually run the tests.
    - Fix bugs following `superpowers-debugging`: reproduce → root cause → clean fix → verify.
    - Verify runtime errors in the browser with `chrome-devtools`.
+   - New pages follow `impeccable-workflow`: `/impeccable shape` → build with `component-registries` → `/impeccable critique` and `audit` → toolkit checks → `/impeccable polish`.
    - Every UI change passes `a11y-auditor`; pages stay within the `web-performance` budgets.
    - Frontend code and dependencies follow `frontend-security`; releases follow `deploy-and-ops`.
    - Use the matching feature skill: `forms`, `auth-flows`, `api-design`, `database-design`, `transactional-email`, `ai-features`, `realtime`, `ecommerce`, `cms-content`, `landing-page`, `pwa-mobile`.
@@ -311,6 +315,7 @@ Restart Claude Code and run in your project:
    .claude/settings.local.json
    CLAUDE.local.md
    playwright/.auth/
+   # Impeccable: add the ignore block for .impeccable/ from its README
    ```
 
 6. **Keep secrets in environment variables only** (e.g. `API_KEY_21ST` in your shell profile
@@ -389,6 +394,9 @@ registers two checks for the `Write`, `Edit` and `MultiEdit` tools:
 git -C ~/claude-web-skills-toolkit pull
 bash ~/claude-web-skills-toolkit/install.sh --skills --force
 
+# Update Impeccable
+npx impeccable update
+
 # Update the plugin catalogs (then update the plugins themselves in Claude Code via /plugin)
 claude plugin marketplace update claude-code-plugins
 claude plugin marketplace update claude-plugins-official
@@ -438,6 +446,8 @@ governed by their own licenses:
 | skills CLI | Vercel Labs | MIT | https://github.com/vercel-labs/skills |
 | chrome-devtools-mcp | Google Chrome DevTools team | Apache-2.0 | https://github.com/ChromeDevTools/chrome-devtools-mcp |
 | 21st MCP / magic-mcp | 21st.dev | ISC (magic-mcp), MIT (@21st-dev/cli) | https://github.com/21st-dev/magic-mcp |
+| Impeccable | Paul Bakaus | Apache-2.0 | https://github.com/pbakaus/impeccable |
+| Component registries (Magic UI, Aceternity UI, React Bits, …) | their authors | per registry — see `component-registries` | https://ui.shadcn.com/r/registries.json |
 | Laws of UX (inspiration for `ux-laws`) | Jon Yablonski | website content © the author; the skill is an original wording | https://lawsofux.com |
 
 Product names and trademarks belong to their respective owners. This project is not

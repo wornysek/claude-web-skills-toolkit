@@ -41,7 +41,7 @@ opakovaně produkují stejné typy problémů:
 
 | Problém | Jak vypadá | Co s tím toolkit dělá |
 |---------|------------|-----------------------|
-| **AI slop v designu** | Fialovo-růžové gradienty, Inter všude, vycentrované všechno, emoji místo ikon, žádné loading/empty stavy, komponenty psané z nuly | `frontend-design-guide` zakazuje generické vzory a vynucuje tokeny, skeletony a empty states. `shadcn-ui` nutí agenta brát komponenty z registru. Oficiální plugin `frontend-design` dodá estetický směr. `magic-animations` přidá promyšlené animace s ohledem na výkon. |
+| **AI slop v designu** | Fialovo-růžové gradienty, Inter všude, vycentrované všechno, emoji místo ikon, žádné loading/empty stavy, komponenty psané z nuly | `frontend-design-guide` zakazuje generické vzory a vynucuje tokeny, skeletony a empty states. `shadcn-ui` nutí agenta brát komponenty z registru. Oficiální plugin `frontend-design` dodá estetický směr. `magic-animations` přidá promyšlené animace s ohledem na výkon. `component-registries` staví každou sekci z promyšleného vzoru a osvědčených komponent z komunitních registrů místo stále stejných výchozích; Impeccable (`impeccable-workflow`) přidává příkazy shape, critique, audit a polish. |
 | **Nebezpečný kód** | Tokeny v `localStorage`, chybějící kontrola vlastnictví (IDOR), `req.body` rovnou do DB, OAuth bez `state`, webhooky bez ověření podpisu, stack traces v produkci, API klíče vložené přímo do kódu | `backend-security-auditor` obsahuje striktní pravidla (MUSÍ) pro auth, IDOR, validaci, DB, API odpovědi, hlavičky a produkci včetně hotových bezpečných vzorů kódu a závěrečné „Security Gate“. Volitelný hlídací hook zablokuje tajné hodnoty dřív, než se zapíšou do souboru. |
 | **Ignorování UX** | 4 stejně výrazná tlačítka, malé dotykové cíle, žádná zpětná vazba po kliknutí, formulář ztratí data po chybě | `ux-laws` převádí 20 zákonů UX (Hick, Fitts, Doherty < 400 ms, Peak-End…) na ověřitelné *Implementation Checks*. `vercel-web-guidelines` spouští automatizovaný design audit (spacing, grid, kontrast). |
 | **AI slop v textech** | „Posuňte svou komunitu na další úroveň“, „Něco se pokazilo“, „Odeslat“, vymyšlené „10 000+ spokojených uživatelů“, emoji v nadpisech, „nejde jen o X, jde o Y“ | `ux-writing-en` / `ux-writing-cs` dávají pravidla pro tlačítka, chybové hlášky, empty states, texty landing page a lokalizaci; český skill navíc řeší skloňování, plurály, tykání a vykání a typografii. `deslop-en` / `deslop-cs` jsou korektury, které odstraní typické AI obraty a nezmění fakta. Hlídací hook je po každé úpravě označí automaticky. <!-- guard:allow --> |
@@ -69,7 +69,7 @@ claude-web-skills-toolkit/
 ├── hooks/
 │   ├── slop-secrets-guard.sh      # hook pro Claude Code: blokuje tajné hodnoty, hlásí AI obraty
 │   └── settings.example.json      # registrace hooku pro .claude/settings.json
-└── skills/                        # 32 skillů, každý ve složce se SKILL.md (viz tabulky níže)
+└── skills/                        # 34 skillů, každý ve složce se SKILL.md (viz tabulky níže)
     ├── a11y-auditor/
     ├── ai-features/
     └── …
@@ -94,6 +94,7 @@ nainstalujete příkazem `cp -R skills/<název> .claude/skills/`, všechny najed
 |-------|-------------|
 | [`ux-laws`](skills/ux-laws/SKILL.md) | Návrh nebo review UI podle 20 zákonů UX; formuláře, navigace, onboarding, nízká konverze (inspirováno *Laws of UX*, Jon Yablonski) |
 | [`frontend-design-guide`](skills/frontend-design-guide/SKILL.md) | Nová stránka nebo komponenta, „udělej to hezčí“, fonty, barvy, skeletony, empty states |
+| [`component-registries`](skills/component-registries/SKILL.md) | Weby, které vypadají jako všechny ostatní: nabídka vzorů pro každou sekci, komponenty z Magic UI, Aceternity, React Bits, 21st.dev a dalších registrů |
 | [`a11y-auditor`](skills/a11y-auditor/SKILL.md) | Přístupnost (WCAG 2.2 AA, EAA): klávesnice, čtečky obrazovky, dialogy a vlastní widgety, prohlášení o přístupnosti |
 | [`landing-page`](skills/landing-page/SKILL.md) | Landing page, úvodní, produktové a ceníkové stránky; konverze; A/B testy |
 | [`pwa-mobile`](skills/pwa-mobile/SKILL.md) | Telefony a tablety, dotykové ovládání, manifest, offline režim, instalace, push notifikace |
@@ -151,6 +152,7 @@ nainstalujete příkazem `cp -R skills/<název> .claude/skills/`, všechny najed
 | [`vercel-web-guidelines`](skills/vercel-web-guidelines/SKILL.md) | Externí Agent Skill | Vercel Labs · MIT | `npx skills add vercel-labs/agent-skills` | Po vygenerování stránky; „review my UI“, „audit design“, spacing, grid, kontrast |
 | [`chrome-devtools`](skills/chrome-devtools/SKILL.md) | Externí MCP Server | Google Chrome DevTools team · Apache-2.0 | `claude mcp add chrome-devtools --scope user npx chrome-devtools-mcp@latest` | Stránka nefunguje, chyby v konzoli, selhané requesty, screenshot, výkon (LCP/CLS/INP) |
 | [`magic-animations`](skills/magic-animations/SKILL.md) | Externí MCP Server | 21st.dev · ISC (magic-mcp) / MIT (CLI) · komerční služba s API klíčem | `npx @21st-dev/cli@latest init --client claude --write`<br>nebo `claude mcp add --transport http --scope user 21st https://21st.dev/api/mcp --header "x-api-key: $API_KEY_21ST"` | Interaktivní hero sekce, animované pozadí, animace tlačítek, „oživ stránku“ |
+| [`impeccable-workflow`](skills/impeccable-workflow/SKILL.md) → `impeccable` | Externí Agent Skill | Paul Bakaus · Apache-2.0 | `npx impeccable install` | Designový proces: shape, critique, audit, polish, bolder/quieter; design, který působí generic |
 
 > **Poznámka k 21st.dev:** Magic MCP byl upstreamem nahrazen jednotným 21st MCP a staré
 > API klíče byly zneplatněny. Dříve uváděný příkaz
@@ -207,6 +209,7 @@ Na macOS/Linuxu můžete skript spouštět i přímo (`chmod +x install.sh && ./
 | `--mcp` | Zkratka pro `--chrome --shadcn --magic` |
 | `--skills` | Zkopíruje `skills/*` do `./.claude/skills/` |
 | `--hooks` | Nainstaluje hlídací hook do `./.claude/hooks/` a zaregistruje ho v `./.claude/settings.json` (sloučí, se zálohou `.bak`) |
+| `--impeccable` | Nainstaluje Impeccable pro Claude Code do projektu (`npx impeccable install --providers=claude --scope=project`); pak spusťte `/impeccable init` |
 | `--global` | S `--skills`: kopíruje do `~/.claude/skills/` (dostupné ve všech projektech) |
 | `--force` | Přepíše již existující skilly (i upravený skript hooku) |
 | `-y`, `--yes` | Na všechny otázky odpoví ANO |
@@ -239,7 +242,7 @@ Restartujte Claude Code a v projektu spusťte:
 ```text
 /plugin      → frontend-design, superpowers
 /mcp         → chrome-devtools, shadcn, 21st (stav: connected)
-/skills      → ux-laws, backend-security-auditor, frontend-design-guide, webapp-testing, …
+/skills      → ux-laws, backend-security-auditor, frontend-design-guide, webapp-testing, impeccable, …
 /hooks       → záznamy PreToolUse a PostToolUse pro slop-secrets-guard.sh
 ```
 
@@ -296,6 +299,7 @@ Restartujte Claude Code a v projektu spusťte:
    - Formuláře a kritické flow ověř Playwright testy podle `webapp-testing` a testy skutečně spusť.
    - Chyby řeš podle `superpowers-debugging`: reprodukce → příčina → čistá oprava → ověření.
    - Runtime chyby ověřuj v prohlížeči přes `chrome-devtools`.
+   - Nové stránky podle `impeccable-workflow`: `/impeccable shape` → stavba s `component-registries` → `/impeccable critique` a `audit` → kontroly toolkitu → `/impeccable polish`.
    - Každá změna UI projde `a11y-auditor`; stránky drží rozpočty z `web-performance`.
    - Frontendový kód a závislosti se řídí `frontend-security`; nasazení `deploy-and-ops`.
    - Používej odpovídající skill pro danou funkci: `forms`, `auth-flows`, `api-design`, `database-design`, `transactional-email`, `ai-features`, `realtime`, `ecommerce`, `cms-content`, `landing-page`, `pwa-mobile`.
@@ -310,6 +314,7 @@ Restartujte Claude Code a v projektu spusťte:
    .claude/settings.local.json
    CLAUDE.local.md
    playwright/.auth/
+   # Impeccable: doplňte blok pro .impeccable/ z jeho README
    ```
 
 6. **Nastavte tajné hodnoty** jen jako proměnné prostředí (např. `API_KEY_21ST` v profilu
@@ -385,6 +390,9 @@ registruje dvě kontroly pro nástroje `Write`, `Edit` a `MultiEdit`:
 git -C ~/claude-web-skills-toolkit pull
 bash ~/claude-web-skills-toolkit/install.sh --skills --force
 
+# Aktualizace Impeccable
+npx impeccable update
+
 # Aktualizace katalogů pluginů (samotné pluginy pak aktualizujete v Claude Code přes /plugin)
 claude plugin marketplace update claude-code-plugins
 claude plugin marketplace update claude-plugins-official
@@ -433,6 +441,8 @@ se vlastními licencemi:
 | skills CLI | Vercel Labs | MIT | https://github.com/vercel-labs/skills |
 | chrome-devtools-mcp | Google Chrome DevTools team | Apache-2.0 | https://github.com/ChromeDevTools/chrome-devtools-mcp |
 | 21st MCP / magic-mcp | 21st.dev | ISC (magic-mcp), MIT (@21st-dev/cli) | https://github.com/21st-dev/magic-mcp |
+| Impeccable | Paul Bakaus | Apache-2.0 | https://github.com/pbakaus/impeccable |
+| Registry komponent (Magic UI, Aceternity UI, React Bits, …) | jejich autoři | podle registru — viz `component-registries` | https://ui.shadcn.com/r/registries.json |
 | Laws of UX (inspirace pro `ux-laws`) | Jon Yablonski | obsah webu © autor; skill je vlastní formulace | https://lawsofux.com |
 
 Názvy produktů a ochranné známky patří jejich vlastníkům. Tento projekt není oficiálně
