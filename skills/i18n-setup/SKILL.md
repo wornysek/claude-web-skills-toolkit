@@ -18,8 +18,8 @@ metadata:
 
 This skill covers the **infrastructure**: how locales reach the URL, where strings live,
 how they are formatted and how missing translations are caught. **How the text itself is
-written** belongs to the language skills — `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` and
-`deslop-en` / `deslop-cs` / `deslop-de`.
+written** belongs to the language skills — `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` / `ux-writing-uk` and
+`deslop-en` / `deslop-cs` / `deslop-de` / `deslop-uk`.
 
 ## Process
 
@@ -36,7 +36,7 @@ written** belongs to the language skills — `ux-writing-en` / `ux-writing-cs` /
 
 | Decision | Recommended default | Notes |
 |----------|---------------------|-------|
-| Locale codes | language only (`en`, `cs`, `de`) | add a region (`en-GB`, `pt-BR`) only when content really differs |
+| Locale codes | language only (`en`, `cs`, `de`, `uk` — not `ua`, which is the country) | add a region (`en-GB`, `pt-BR`) only when content really differs |
 | URL strategy | path prefix `/en/…`, `/cs/…` | one URL per language — required for SEO and sharing |
 | Default locale prefix | `always` or `as-needed` | `as-needed` keeps `/pricing` for the default locale |
 | Localized slugs | only for marketing pages | `/en/pricing` ↔ `/cs/cenik`; app routes can share slugs |
@@ -475,7 +475,7 @@ The rules in sections 1 and 4–11 apply to all of them.
 
 ## Related skills
 
-- `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` — how to write the strings in each language; `deslop-en` / `deslop-cs` / `deslop-de` — the editing pass.
+- `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` / `ux-writing-uk` — how to write the strings in each language; `deslop-en` / `deslop-cs` / `deslop-de` / `deslop-uk` — the editing pass.
 - `seo-metadata` — hreflang, canonical URLs and localized metadata in depth.
 - `webapp-testing` — Playwright tests per locale.
 - `shadcn-ui` — the switcher built from registry components.

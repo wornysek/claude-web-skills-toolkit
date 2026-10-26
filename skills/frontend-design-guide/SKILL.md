@@ -50,7 +50,7 @@ aesthetic direction; this file covers **concrete implementation standards** and 
 | Friendly, consumer | DM Sans, Nunito Sans | Bricolage Grotesque |
 
 - Load fonts via `next/font` (self-hosting, no layout shift, `display: "swap"`), not via a `<link>` to Google Fonts.
-- Fonts must support the **diacritics of your target languages** (`subsets: ["latin", "latin-ext"]` for Central European languages).
+- Fonts must support the **diacritics of your target languages** (`subsets: ["latin", "latin-ext"]` for Central European languages, plus `"cyrillic"` for Ukrainian — many display fonts are Latin-only).
 
 ```tsx
 // app/layout.tsx
@@ -100,7 +100,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 - ❌ Emoji as UI icons (🚀 ✨ 🔥) — use Lucide.
 - ❌ Three identical "icon on top + heading + two lines of text" cards as the only structure of the page (alternatives: the pattern menu in `component-registries`).
 - ❌ Everything centered (`text-center` on the whole page).
-- ❌ Lorem ipsum and generic copy ("Revolutionize your workflow") — write real content in the product's language (rules in `ux-writing-en` / `ux-writing-cs` / `ux-writing-de`, editing pass in `deslop-en` / `deslop-cs` / `deslop-de`).
+- ❌ Lorem ipsum and generic copy ("Revolutionize your workflow") — write real content in the product's language (rules in `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` / `ux-writing-uk`, editing pass in `deslop-en` / `deslop-cs` / `deslop-de` / `deslop-uk`).
 
 A gradient is allowed if it is **intentional, subtle and on-brand** (e.g. two close shades of
 the accent, noise/grain, a radial light in the hero section) and you can explain why it is there.

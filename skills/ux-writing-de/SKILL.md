@@ -1,6 +1,6 @@
 ---
 name: ux-writing-de
-description: "Rules for writing German UI copy and web copy (Texte auf Deutsch) that is clear, specific and natural: buttons, form labels and hints, error messages, empty states, dialogs, success messages, emails and landing pages, plus German-specific rules — du vs. Sie, gender-inclusive language, inserted variables and cases, plurals, long compound words and text expansion, legally required button wording in Germany, German typography and number/date formats (DIN 5008, Intl), nominal style and plain language, and regional variants (de-DE, de-AT, de-CH). Use whenever the user-facing text you write or change is in German. For English or Czech text use ux-writing-en or ux-writing-cs instead."
+description: "Rules for writing German UI copy and web copy (Texte auf Deutsch) that is clear, specific and natural: buttons, form labels and hints, error messages, empty states, dialogs, success messages, emails and landing pages, plus German-specific rules — du vs. Sie, gender-inclusive language, inserted variables and cases, plurals, long compound words and text expansion, legally required button wording in Germany, German typography and number/date formats (DIN 5008, Intl), nominal style and plain language, and regional variants (de-DE, de-AT, de-CH). Use whenever the user-facing text you write or change is in German. For English, Czech or Ukrainian text use ux-writing-en, ux-writing-cs or ux-writing-uk instead."
 triggers:
   - "deutsche Texte schreiben / verbessern / Microcopy auf Deutsch"
   - "Button-Text / Fehlermeldung / leerer Zustand / Bestätigungsdialog auf Deutsch"
@@ -262,7 +262,7 @@ Write like you speak to a person.
 
 - Never invent facts, numbers, references, prices or deadlines. A visible `[TODO: …]` beats a plausible fake.
 - Keep the project's form of address and gender-inclusive style; if they are not defined, ask once and record the answers.
-- Don't mix German with English or Czech in one UI; English strings follow `ux-writing-en`, Czech strings `ux-writing-cs`.
+- Don't mix German with English or Czech in one UI; English strings follow `ux-writing-en`, Czech strings `ux-writing-cs`, Ukrainian strings `ux-writing-uk`.
 - If the project has an i18n layer, change strings in the message files, with ICU plurals (`i18n-setup`).
 - After writing, always run `deslop-de`.
 - Related skills: `ux-laws`, `frontend-design-guide`, `backend-security-auditor`, `ecommerce` (legal button wording), `a11y-auditor`.

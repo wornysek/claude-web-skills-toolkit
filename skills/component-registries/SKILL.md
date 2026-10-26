@@ -163,4 +163,4 @@ A registry component is a starting point. Before it ships:
 
 ## Related skills
 
-- `landing-page` (which sections and why), `frontend-design-guide` (tokens, anti-slop), `impeccable-workflow` (shape, critique, polish, delight), `shadcn-ui` (primitives and MCP), `magic-animations` (21st.dev MCP and motion rules), `a11y-auditor`, `web-performance`, `frontend-security`, `ux-writing-en` / `ux-writing-cs` / `ux-writing-de`.
+- `landing-page` (which sections and why), `frontend-design-guide` (tokens, anti-slop), `impeccable-workflow` (shape, critique, polish, delight), `shadcn-ui` (primitives and MCP), `magic-animations` (21st.dev MCP and motion rules), `a11y-auditor`, `web-performance`, `frontend-security`, `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` / `ux-writing-uk`.

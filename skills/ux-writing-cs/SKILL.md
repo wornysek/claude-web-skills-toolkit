@@ -1,6 +1,6 @@
 ---
 name: ux-writing-cs
-description: "Rules for writing Czech UI copy and web copy (texty v češtině) that is clear, specific and natural: buttons, form labels and hints, error messages, empty states, confirmation dialogs, success messages, emails and landing pages, plus Czech-specific grammar for interfaces — tykání vs. vykání, gender-neutral phrasing, declension of inserted variables, plural forms with verb agreement, Czech typography, number and date formats, sorting and common calques from English. Use whenever the user-facing text you write or change is in Czech. For English or German text use ux-writing-en or ux-writing-de instead."
+description: "Rules for writing Czech UI copy and web copy (texty v češtině) that is clear, specific and natural: buttons, form labels and hints, error messages, empty states, confirmation dialogs, success messages, emails and landing pages, plus Czech-specific grammar for interfaces — tykání vs. vykání, gender-neutral phrasing, declension of inserted variables, plural forms with verb agreement, Czech typography, number and date formats, sorting and common calques from English. Use whenever the user-facing text you write or change is in Czech. For English, German or Ukrainian text use ux-writing-en, ux-writing-de or ux-writing-uk instead."
 triggers:
   - "napiš / vylepši texty, textace, microcopy v češtině"
   - "české tlačítko / chybová hláška / prázdný stav / potvrzovací dialog"
@@ -260,7 +260,7 @@ Czech UI text often sounds translated from English. Write it the way a Czech per
 
 - Never invent facts, numbers, references, prices or deadlines. A visible `[TODO: …]` beats a plausible fake.
 - Keep the project's form of address; if it is not defined, ask once and record the answer in `CLAUDE.md`.
-- Don't mix Czech and English in one UI; English strings follow `ux-writing-en`, German strings `ux-writing-de`.
+- Don't mix Czech and English in one UI; English strings follow `ux-writing-en`, German strings `ux-writing-de`, Ukrainian strings `ux-writing-uk`.
 - If the project has an i18n layer, change strings in the message files, with ICU plurals. The technical setup is in `i18n-setup`.
 - After writing, always run `deslop-cs`.
 - Related skills: `ux-laws`, `frontend-design-guide`, `backend-security-auditor`.

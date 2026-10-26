@@ -73,7 +73,7 @@ current set. The upstream list evolves — the stages below map the main ones.
 | **New page or surface** | `shape` (plan before code), `craft` (shape and build with visual iteration) | `landing-page` (sections), `component-registries` (patterns and components), `shadcn-ui` (primitives) |
 | **Visual direction** | `typeset`, `layout`, `colorize`, `bolder`, `quieter`, `distill` | `frontend-design-guide` (tokens, Tailwind, shadcn) |
 | **Motion and delight** | `animate`, `delight`, `overdrive` | `magic-animations` (motion performance and reduced motion), `web-performance` (budgets) |
-| **Copy** | `clarify` | `ux-writing-en` / `ux-writing-cs` / `ux-writing-de`, then `deslop-en` / `deslop-cs` / `deslop-de` |
+| **Copy** | `clarify` | `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` / `ux-writing-uk`, then `deslop-en` / `deslop-cs` / `deslop-de` / `deslop-uk` |
 | **Robustness** | `harden`, `onboard`, `adapt` | `i18n-setup`, `frontend-design-guide` (states), `pwa-mobile` |
 | **Review before handoff** | `critique` (UX review), `audit` (technical checks), `polish` (final pass) | `a11y-auditor`, `web-performance`, `ux-laws`, `vercel-web-guidelines` |
 | **Iterate in the browser** | `live`, `generate` | `chrome-devtools` |
@@ -129,4 +129,4 @@ When reporting design work, list what was run and what changed:
 
 ## Related skills
 
-- `frontend-design-guide`, `component-registries`, `shadcn-ui`, `magic-animations`, `landing-page`, `ux-laws`, `a11y-auditor`, `web-performance`, `ux-writing-en` / `ux-writing-cs` / `ux-writing-de`.
+- `frontend-design-guide`, `component-registries`, `shadcn-ui`, `magic-animations`, `landing-page`, `ux-laws`, `a11y-auditor`, `web-performance`, `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` / `ux-writing-uk`.

@@ -1,6 +1,6 @@
 ---
 name: deslop-de
-description: "Editing pass that removes 'AI slop' from German text (Texte auf Deutsch): empty phrases and buzzwords ('In der heutigen schnelllebigen Welt', 'auf das nächste Level heben', 'nahtlos', 'bahnbrechend'), Anglicisms and calques ('Sinn machen', 'in 2026', 'einen Unterschied machen', 'realisieren' for 'bemerken'), nominal and bureaucratic style ('Durchführung', 'erfolgt', 'zur Verfügung stellen'), formulaic structures, English typography in German text (Title Case, em dashes, English quotes, Oxford comma, apostrophe errors), inconsistent du/Sie and gendering, and invented specifics — keeping meaning, facts, links and code intact. Use on any German prose you write or edit — UI texts, web copy, README, documentation, emails, announcements — and whenever the user says 'deslop', 'klingt nach KI', 'klingt übersetzt', 'kürzen' or 'natürlicher formulieren'. For English or Czech text use deslop-en or deslop-cs instead."
+description: "Editing pass that removes 'AI slop' from German text (Texte auf Deutsch): empty phrases and buzzwords ('In der heutigen schnelllebigen Welt', 'auf das nächste Level heben', 'nahtlos', 'bahnbrechend'), Anglicisms and calques ('Sinn machen', 'in 2026', 'einen Unterschied machen', 'realisieren' for 'bemerken'), nominal and bureaucratic style ('Durchführung', 'erfolgt', 'zur Verfügung stellen'), formulaic structures, English typography in German text (Title Case, em dashes, English quotes, Oxford comma, apostrophe errors), inconsistent du/Sie and gendering, and invented specifics — keeping meaning, facts, links and code intact. Use on any German prose you write or edit — UI texts, web copy, README, documentation, emails, announcements — and whenever the user says 'deslop', 'klingt nach KI', 'klingt übersetzt', 'kürzen' or 'natürlicher formulieren'. For English, Czech or Ukrainian text use deslop-en, deslop-cs or deslop-uk instead."
 triggers:
   - "deslop / /deslop-de <Datei>"
   - "klingt nach KI / ChatGPT / wie übersetzt"
@@ -121,7 +121,7 @@ The goal is text that is **specific, direct, true and sounds like it was written
 - **Keep the author's voice, terminology, form of address and gender-inclusive style.** Don't add jokes or opinions.
 - **Meaning is sacred:** facts, links, code, commands, numbers and quotes stay exactly as they were.
 - **Context matters:** „robust“ in statistics or engineering is a term; established loanwords („Feedback“, „Team“, „E-Mail“) are fine.
-- **Never translate during deslop.** German stays German; English parts go to `deslop-en`, Czech parts to `deslop-cs`.
+- **Never translate during deslop.** German stays German; English parts go to `deslop-en`, Czech parts to `deslop-cs`, Ukrainian parts to `deslop-uk`.
 - **Check grammar after rewriting:** cases, articles, adjective endings, capitalization of nouns.
 
 ## Grep helper
@@ -184,5 +184,5 @@ For files:
 ## Related skills
 
 - `ux-writing-de` — rules for writing German UI and web copy in the first place.
-- `deslop-en`, `deslop-cs` — the same pass for English and Czech text.
+- `deslop-en`, `deslop-cs`, `deslop-uk` — the same pass for English, Czech and Ukrainian text.
 - `frontend-design-guide` — the visual counterpart.

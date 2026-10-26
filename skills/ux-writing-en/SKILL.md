@@ -1,6 +1,6 @@
 ---
 name: ux-writing-en
-description: "Rules for writing English UI copy and web copy that is clear, specific and human: button labels, form labels and hints, error messages, empty states, confirmation dialogs, success messages and notifications, onboarding, emails and landing page copy (headlines, subheadlines, CTAs), plus voice and tone, a glossary, mechanics and localization-safe strings. Use whenever the user-facing text you write or change is in English. For Czech or German text use ux-writing-cs or ux-writing-de instead."
+description: "Rules for writing English UI copy and web copy that is clear, specific and human: button labels, form labels and hints, error messages, empty states, confirmation dialogs, success messages and notifications, onboarding, emails and landing page copy (headlines, subheadlines, CTAs), plus voice and tone, a glossary, mechanics and localization-safe strings. Use whenever the user-facing text you write or change is in English. For Czech, German or Ukrainian text use ux-writing-cs, ux-writing-de or ux-writing-uk instead."
 triggers:
   - "write / improve the copy, wording, microcopy (English)"
   - "button label / error message / empty state / confirmation dialog"
@@ -21,7 +21,7 @@ Text is part of the interface. Generated UIs usually ship with copy that is gene
 Sign in / Login on three screens) or invented ("Trusted by 10,000+ teams"). This skill
 sets the rules for writing English copy; `deslop-en` is the editing pass that follows.
 
-For Czech copy use `ux-writing-cs`, for German `ux-writing-de`. If a product has several
+For Czech copy use `ux-writing-cs`, for German `ux-writing-de`, for Ukrainian `ux-writing-uk`. If a product has several
 languages, use each skill for its own strings.
 
 ## Process
@@ -249,7 +249,7 @@ technical setup (routing, message files, formatting, CI checks) is in `i18n-setu
 ## Behavior rules
 
 - Never invent facts, numbers, testimonials, prices, deadlines or guarantees. A visible `[TODO: …]` is always better than a plausible fake.
-- Don't mix languages in one UI. Czech strings follow `ux-writing-cs`, German strings `ux-writing-de`.
+- Don't mix languages in one UI. Czech strings follow `ux-writing-cs`, German strings `ux-writing-de`, Ukrainian strings `ux-writing-uk`.
 - If the project has an i18n layer, change strings there, not inline in components.
 - After writing, always run `deslop-en`. For long-form docs, also the Vercel `writing-guidelines` skill (installed with `./install.sh --vercel`).
 - Related skills: `ux-laws` (Recognition over Recall, Feedback Loops, Peak-End), `frontend-design-guide` (empty and error states), `backend-security-auditor` (error messages that don't leak information).

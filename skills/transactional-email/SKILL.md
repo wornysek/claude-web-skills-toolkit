@@ -110,7 +110,7 @@ export default function PasswordResetEmail({ name, resetUrl, locale = "en" }: { 
 - **One purpose and one primary action** per email; the subject states the result or the action ("Your payment was received", "Confirm your email").
 - **Preview text** (preheader) adds information instead of repeating the subject.
 - **Plain-text version** always (accessibility, spam filters, some clients).
-- **Localized** in the recipient's stored language, with dates and amounts formatted for that locale (`i18n-setup`); copy by `ux-writing-en` / `ux-writing-cs` / `ux-writing-de`, then `deslop-*`.
+- **Localized** in the recipient's stored language, with dates and amounts formatted for that locale (`i18n-setup`); copy by `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` / `ux-writing-uk`, then `deslop-*`.
 - Brand from the design tokens, but email-safe: inline styles, system fonts or web fonts with fallbacks, max width ~600 px, no layout depending on CSS that email clients drop.
 
 ## 4. Accessibility, dark mode and links
@@ -166,4 +166,4 @@ export default function PasswordResetEmail({ name, resetUrl, locale = "en" }: { 
 
 ## Related skills
 
-- `auth-flows` (verification, magic links, reset, security notifications), `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` (copy), `i18n-setup` (recipient locale), `gdpr-privacy` (consent, retention), `deploy-and-ops` (DNS, jobs, monitoring), `backend-security-auditor` (webhook signatures, rate limits).
+- `auth-flows` (verification, magic links, reset, security notifications), `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` / `ux-writing-uk` (copy), `i18n-setup` (recipient locale), `gdpr-privacy` (consent, retention), `deploy-and-ops` (DNS, jobs, monitoring), `backend-security-auditor` (webhook signatures, rate limits).

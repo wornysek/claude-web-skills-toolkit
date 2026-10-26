@@ -44,7 +44,7 @@ they keep producing the same kinds of problems:
 | **AI slop in design** | Purple-to-pink gradients, Inter everywhere, everything centered, emoji instead of icons, no loading/empty states, components written from scratch | `frontend-design-guide` bans generic patterns and enforces design tokens, skeletons and empty states. `shadcn-ui` makes the agent take components from the registry. The official `frontend-design` plugin provides an aesthetic direction. `magic-animations` adds deliberate, performance-aware animations. `component-registries` builds each section from a deliberate pattern and proven community components instead of the same defaults; Impeccable (`impeccable-workflow`) adds shape, critique, audit and polish commands. |
 | **Insecure code** | Tokens in `localStorage`, missing ownership checks (IDOR), `req.body` written straight to the DB, OAuth without `state`, webhooks without signature verification, stack traces in production, API keys pasted into source files | `backend-security-auditor` contains strict MUST rules for auth, IDOR, validation, the database, API responses, headers and production, including ready-made secure code patterns and a final "Security Gate". The optional guard hook blocks secrets before they are written to a file. |
 | **Ignored UX** | Four equally prominent buttons, tiny touch targets, no feedback after a click, a form that loses its data after an error | `ux-laws` turns 20 UX laws (Hick, Fitts, Doherty < 400 ms, Peak-End…) into verifiable *Implementation Checks*. `vercel-web-guidelines` runs an automated design audit (spacing, grid, contrast). |
-| **AI slop in text** | "Unlock seamless synergy", "Something went wrong", "Submit", invented "10,000+ happy users", emoji headings, "it's not just X, it's Y" | `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` set rules for buttons, errors, empty states, landing copy and localization; the Czech and German skills add their grammar, forms of address and typography. `deslop-en` / `deslop-cs` / `deslop-de` are the editing passes that remove AI writing tells without changing facts. The guard hook flags them automatically after every edit. <!-- guard:allow --> |
+| **AI slop in text** | "Unlock seamless synergy", "Something went wrong", "Submit", invented "10,000+ happy users", emoji headings, "it's not just X, it's Y" | `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` / `ux-writing-uk` set rules for buttons, errors, empty states, landing copy and localization; the Czech, German and Ukrainian skills add their grammar, forms of address and typography. `deslop-en` / `deslop-cs` / `deslop-de` / `deslop-uk` are the editing passes that remove AI writing tells without changing facts. The guard hook flags them automatically after every edit. <!-- guard:allow --> |
 | **Invisible or non-compliant** | One title for the whole site, no social previews, indexable admin and staging pages, analytics firing before consent, no way to export data or delete an account | `seo-metadata` covers titles, canonicals, OG images, sitemap, robots, hreflang and JSON-LD. `gdpr-privacy` covers data minimization, consent without dark patterns, data subject rights, retention and PII in logs. |
 
 Quality is also **verified at runtime**: `webapp-testing` generates and runs Playwright E2E
@@ -69,7 +69,7 @@ claude-web-skills-toolkit/
 ├── hooks/
 │   ├── slop-secrets-guard.sh      # Claude Code hook: blocks secrets, flags AI writing tells
 │   └── settings.example.json      # hook registration for .claude/settings.json
-└── skills/                        # 36 skills, each a folder with a SKILL.md (see the tables below)
+└── skills/                        # 38 skills, each a folder with a SKILL.md (see the tables below)
     ├── a11y-auditor/
     ├── ai-features/
     └── …
@@ -103,9 +103,11 @@ manually with `cp -R skills/<name> .claude/skills/`, or all of them with `./inst
 | [`ux-writing-en`](skills/ux-writing-en/SKILL.md) | English UI and web copy: buttons, errors, empty states, landing pages, emails |
 | [`ux-writing-cs`](skills/ux-writing-cs/SKILL.md) | Czech UI and web copy: *tykání / vykání*, declension, plurals, Czech typography |
 | [`ux-writing-de`](skills/ux-writing-de/SKILL.md) | German UI and web copy: *du / Sie*, gender-inclusive language, compound words, legal button wording, German typography |
+| [`ux-writing-uk`](skills/ux-writing-uk/SKILL.md) | Ukrainian UI and web copy: *ви / ти*, vocative and other cases, four plural forms, euphony, apostrophe, Cyrillic fonts |
 | [`deslop-en`](skills/deslop-en/SKILL.md) | `/deslop-en <file>`, English text that sounds like AI; READMEs, docs, PR descriptions, commits |
 | [`deslop-cs`](skills/deslop-cs/SKILL.md) | `/deslop-cs <file>`, Czech text that sounds like AI or like a translation |
 | [`deslop-de`](skills/deslop-de/SKILL.md) | `/deslop-de <file>`, German text that sounds like AI, like a translation or like an office letter |
+| [`deslop-uk`](skills/deslop-uk/SKILL.md) | `/deslop-uk <file>`, Ukrainian text with AI phrases, calques, Russianisms or bureaucratic style |
 | [`i18n-setup`](skills/i18n-setup/SKILL.md) | A second language: locale routing, message files, ICU plurals, formatting, language switcher |
 | [`seo-metadata`](skills/seo-metadata/SKILL.md) | Public pages: metadata, OG images, sitemap, robots, noindex, hreflang, JSON-LD |
 | [`cms-content`](skills/cms-content/SKILL.md) | Blogs, docs and marketing sites: headless CMS, MDX, previews, editorial workflow |
@@ -294,7 +296,7 @@ Restart Claude Code and run in your project:
    - New projects and major new dependencies are decided with `tech-stack-advisor` and recorded in `docs/adr/`.
    - UI: follow the `frontend-design-guide` and `ux-laws` skills; use components from the shadcn registry only (`shadcn-ui`).
    - After generating or changing a page, run the `vercel-web-guidelines` audit.
-   - Write user-facing text following `ux-writing-en`, `ux-writing-cs` or `ux-writing-de` (by language), then run the matching `deslop-*` skill. Never invent numbers or testimonials.
+   - Write user-facing text following `ux-writing-en`, `ux-writing-cs`, `ux-writing-de` or `ux-writing-uk` (by language), then run the matching `deslop-*` skill. Never invent numbers or testimonials.
    - Every public page gets metadata per `seo-metadata`; every feature touching personal data follows `gdpr-privacy`.
    - No hard-coded user-facing strings: messages, plurals and formatting follow `i18n-setup`.
    - Every endpoint, server action, webhook and upload goes through `backend-security-auditor`, including the Security Gate.
@@ -348,10 +350,11 @@ metadata:
   harmless.
 - A skill can also be invoked explicitly: *"Use the backend-security-auditor skill on app/api."*
   or as a slash command: `/deslop-en README.md`.
-- **Language-specific skills** come in sets for English, Czech and German (`ux-writing-en` /
-  `-cs` / `-de`, `deslop-en` / `-cs` / `-de`). Each is self-contained, and its description says
-  which language it is for, so the agent picks the right one by the language of the text. All
-  skill instructions are in English; the Czech and German skills use examples in their language.
+- **Language-specific skills** come in sets for English, Czech, German and Ukrainian
+  (`ux-writing-en` / `-cs` / `-de` / `-uk`, `deslop-en` / `-cs` / `-de` / `-uk`). Each is
+  self-contained, and its description says which language it is for, so the agent picks the
+  right one by the language of the text. All skill instructions are in English; the other
+  language skills use examples in their language.
 - Location: `./.claude/skills/<name>/SKILL.md` (project, shared via git) or
   `~/.claude/skills/<name>/SKILL.md` (personal, all projects).
 
@@ -364,7 +367,7 @@ registers two checks for the `Write`, `Edit` and `MultiEdit` tools:
 | Check | Event | What it does |
 |-------|-------|--------------|
 | `secrets` | `PreToolUse` | **Blocks** the edit if the new text contains something that looks like a secret: private keys, AWS/GitHub/GitLab/Slack/Stripe/Google/OpenAI/Anthropic/SendGrid/npm tokens, JWTs, passwords in connection strings, hard-coded credentials. Local `.env` files are skipped; `.env.example` is checked. Values are never printed, only the type and a masked preview. |
-| `slop` | `PostToolUse` | **Reports** English, Czech and German AI writing tells in Markdown, HTML, text, UI code and translation files back to Claude, which then rewrites them with `deslop-en` / `deslop-cs` / `deslop-de`. Single words are checked only in prose files, so code identifiers like `unlock()` don't trigger it. |
+| `slop` | `PostToolUse` | **Reports** English, Czech, German and Ukrainian AI writing tells in Markdown, HTML, text, UI code and translation files back to Claude, which then rewrites them with `deslop-en` / `deslop-cs` / `deslop-de` / `deslop-uk`. Single words are checked only in prose files, so code identifiers like `unlock()` don't trigger it. |
 
 - **False positives:** add `guard:allow` to the line (e.g. `<!-- guard:allow -->` or `// guard:allow`).
   A file containing `slop-guard: off` is skipped by the slop check; `SKILL.md` files are always skipped.
