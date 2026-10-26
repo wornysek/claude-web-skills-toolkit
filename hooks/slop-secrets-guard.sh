@@ -8,9 +8,9 @@
 #      Local .env files are skipped; .env.example / .env.sample are checked.
 #
 #  slop     (PostToolUse, Write|Edit|MultiEdit)
-#      Reports typical AI writing tells (English and Czech) in the new text of
+#      Reports typical AI writing tells (English, Czech, German) in the new text of
 #      prose and UI files back to Claude, so it can rewrite them with the
-#      deslop-en / deslop-cs skills. The edit itself is not undone.
+#      deslop-en / deslop-cs / deslop-de skills. The edit itself is not undone.
 #
 #  Exit codes follow the Claude Code hook contract:
 #      0  nothing found
@@ -179,10 +179,12 @@ check_slop() {
   # Single words only in prose files — code has identifiers like "unlock" or "robust".
   local words_en="leverag(e|es|ed|ing)|utiliz(e|es|ed|ing)|seamless(ly)?|robust|synerg(y|ies)|holistic|transformative|empower(s|ing)?|streamlin(e|es|ed|ing)|myriad|plethora|tapestry|pivotal|meticulous(ly)?|unleash"
   local words_cs="revoluční|inovativní|nepostradateln|realizova|za účelem|dochází k"
+  local phrases_de="in der heutigen (schnelllebigen|digitalen)|tauchen wir ein|lassen sie uns eintauchen|auf das nächste level|zögern sie nicht|zusammenfassend lässt sich|es ist wichtig zu beachten|von entscheidender bedeutung|integraler bestandteil|macht sinn|sinn machen|am ende des tages|einen unterschied machen|erschließen sie das volle potenzial"
+  local words_de="bahnbrechend|revolutionär|nahtlos|ganzheitlich|maßgeschneidert|synergien"
 
-  local pattern="${phrases_en}|${phrases_cs}"
+  local pattern="${phrases_en}|${phrases_cs}|${phrases_de}"
   if (( prose )); then
-    pattern="${pattern}|(^|[^a-z])(${words_en})([^a-z]|$)|${words_cs}"
+    pattern="${pattern}|(^|[^a-z])(${words_en})([^a-z]|$)|${words_cs}|${words_de}"
   fi
 
   printf '%s\n' "${NEW_TEXT}" | grep -iqE -- "${pattern}" || exit 0
@@ -210,7 +212,7 @@ check_slop() {
   {
     echo "slop-guard: possible AI writing tells in ${FILE_PATH}:"
     printf '%s\n' "${report}"
-    echo "Rewrite these with the deslop-en / deslop-cs skill (keep facts, links and code unchanged)."
+    echo "Rewrite these with the deslop-en / deslop-cs / deslop-de skill (keep facts, links and code unchanged)."
     echo "If a use is legitimate (a technical term, a quote), keep it and add 'guard:allow' to the line."
   } >&2
   exit 2
