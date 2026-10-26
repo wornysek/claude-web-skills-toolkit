@@ -18,8 +18,8 @@ metadata:
 
 This skill covers the **infrastructure**: how locales reach the URL, where strings live,
 how they are formatted and how missing translations are caught. **How the text itself is
-written** belongs to the language skills — `ux-writing-en` / `ux-writing-cs` and
-`deslop-en` / `deslop-cs`.
+written** belongs to the language skills — `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` and
+`deslop-en` / `deslop-cs` / `deslop-de`.
 
 ## Process
 
@@ -475,7 +475,7 @@ The rules in sections 1 and 4–11 apply to all of them.
 
 ## Related skills
 
-- `ux-writing-en` / `ux-writing-cs` — how to write the strings in each language; `deslop-en` / `deslop-cs` — the editing pass.
+- `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` — how to write the strings in each language; `deslop-en` / `deslop-cs` / `deslop-de` — the editing pass.
 - `seo-metadata` — hreflang, canonical URLs and localized metadata in depth.
 - `webapp-testing` — Playwright tests per locale.
 - `shadcn-ui` — the switcher built from registry components.

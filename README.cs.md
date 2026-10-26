@@ -44,7 +44,7 @@ opakovaně produkují stejné typy problémů:
 | **AI slop v designu** | Fialovo-růžové gradienty, Inter všude, vycentrované všechno, emoji místo ikon, žádné loading/empty stavy, komponenty psané z nuly | `frontend-design-guide` zakazuje generické vzory a vynucuje tokeny, skeletony a empty states. `shadcn-ui` nutí agenta brát komponenty z registru. Oficiální plugin `frontend-design` dodá estetický směr. `magic-animations` přidá promyšlené animace s ohledem na výkon. `component-registries` staví každou sekci z promyšleného vzoru a osvědčených komponent z komunitních registrů místo stále stejných výchozích; Impeccable (`impeccable-workflow`) přidává příkazy shape, critique, audit a polish. |
 | **Nebezpečný kód** | Tokeny v `localStorage`, chybějící kontrola vlastnictví (IDOR), `req.body` rovnou do DB, OAuth bez `state`, webhooky bez ověření podpisu, stack traces v produkci, API klíče vložené přímo do kódu | `backend-security-auditor` obsahuje striktní pravidla (MUSÍ) pro auth, IDOR, validaci, DB, API odpovědi, hlavičky a produkci včetně hotových bezpečných vzorů kódu a závěrečné „Security Gate“. Volitelný hlídací hook zablokuje tajné hodnoty dřív, než se zapíšou do souboru. |
 | **Ignorování UX** | 4 stejně výrazná tlačítka, malé dotykové cíle, žádná zpětná vazba po kliknutí, formulář ztratí data po chybě | `ux-laws` převádí 20 zákonů UX (Hick, Fitts, Doherty < 400 ms, Peak-End…) na ověřitelné *Implementation Checks*. `vercel-web-guidelines` spouští automatizovaný design audit (spacing, grid, kontrast). |
-| **AI slop v textech** | „Posuňte svou komunitu na další úroveň“, „Něco se pokazilo“, „Odeslat“, vymyšlené „10 000+ spokojených uživatelů“, emoji v nadpisech, „nejde jen o X, jde o Y“ | `ux-writing-en` / `ux-writing-cs` dávají pravidla pro tlačítka, chybové hlášky, empty states, texty landing page a lokalizaci; český skill navíc řeší skloňování, plurály, tykání a vykání a typografii. `deslop-en` / `deslop-cs` jsou korektury, které odstraní typické AI obraty a nezmění fakta. Hlídací hook je po každé úpravě označí automaticky. <!-- guard:allow --> |
+| **AI slop v textech** | „Posuňte svou komunitu na další úroveň“, „Něco se pokazilo“, „Odeslat“, vymyšlené „10 000+ spokojených uživatelů“, emoji v nadpisech, „nejde jen o X, jde o Y“ | `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` dávají pravidla pro tlačítka, chybové hlášky, empty states, texty landing page a lokalizaci; český a německý skill navíc řeší gramatiku, oslovení a typografii svého jazyka. `deslop-en` / `deslop-cs` / `deslop-de` jsou korektury, které odstraní typické AI obraty a nezmění fakta. Hlídací hook je po každé úpravě označí automaticky. <!-- guard:allow --> |
 | **Neviditelné nebo v rozporu s GDPR** | Jeden titulek pro celý web, žádné náhledy pro sdílení, indexované administrace a staging, analytika běžící před souhlasem, žádná možnost exportu dat ani smazání účtu | `seo-metadata` řeší titulky, kanonické URL, OG obrázky, sitemap, robots, hreflang a JSON-LD. `gdpr-privacy` řeší minimalizaci dat, souhlas bez manipulativních triků, práva subjektů údajů, dobu uchovávání a osobní údaje v logech. |
 
 Kvalitu navíc **ověřuje v běhu**: `webapp-testing` generuje a spouští Playwright E2E
@@ -69,7 +69,7 @@ claude-web-skills-toolkit/
 ├── hooks/
 │   ├── slop-secrets-guard.sh      # hook pro Claude Code: blokuje tajné hodnoty, hlásí AI obraty
 │   └── settings.example.json      # registrace hooku pro .claude/settings.json
-└── skills/                        # 34 skillů, každý ve složce se SKILL.md (viz tabulky níže)
+└── skills/                        # 36 skillů, každý ve složce se SKILL.md (viz tabulky níže)
     ├── a11y-auditor/
     ├── ai-features/
     └── …
@@ -105,8 +105,10 @@ nainstalujete příkazem `cp -R skills/<název> .claude/skills/`, všechny najed
 |-------|-------------|
 | [`ux-writing-en`](skills/ux-writing-en/SKILL.md) | Anglické texty v UI a na webu: tlačítka, chyby, empty states, landing page, e-maily |
 | [`ux-writing-cs`](skills/ux-writing-cs/SKILL.md) | České texty v UI a na webu: tykání a vykání, skloňování, plurály, typografie |
+| [`ux-writing-de`](skills/ux-writing-de/SKILL.md) | Německé texty v UI a na webu: du a Sie, genderově citlivý jazyk, složená slova, povinné texty tlačítek, typografie |
 | [`deslop-en`](skills/deslop-en/SKILL.md) | `/deslop-en <soubor>`, anglický text, který zní jako AI; README, dokumentace, popisy PR, commity |
 | [`deslop-cs`](skills/deslop-cs/SKILL.md) | `/deslop-cs <soubor>`, český text, který zní jako AI nebo jako překlad |
+| [`deslop-de`](skills/deslop-de/SKILL.md) | `/deslop-de <soubor>`, německý text, který zní jako AI, jako překlad nebo jako úřední dopis |
 | [`i18n-setup`](skills/i18n-setup/SKILL.md) | Druhý jazyk: routing podle jazyka, soubory s překlady, ICU plurály, formáty, přepínač jazyka |
 | [`seo-metadata`](skills/seo-metadata/SKILL.md) | Veřejné stránky: metadata, OG obrázky, sitemap, robots, noindex, hreflang, JSON-LD |
 | [`cms-content`](skills/cms-content/SKILL.md) | Blogy, dokumentace a marketingové weby: headless CMS, MDX, náhledy, redakční workflow |
@@ -292,7 +294,7 @@ Restartujte Claude Code a v projektu spusťte:
    - O stacku nových projektů a velkých nových závislostech rozhoduj podle `tech-stack-advisor` a zapiš rozhodnutí do `docs/adr/`.
    - UI: řiď se skilly `frontend-design-guide` a `ux-laws`; komponenty výhradně ze shadcn registru (`shadcn-ui`).
    - Po vygenerování nebo úpravě stránky spusť audit `vercel-web-guidelines`.
-   - Texty pro uživatele piš podle `ux-writing-en` nebo `ux-writing-cs` (podle jazyka) a pak je projeď skillem `deslop-en` / `deslop-cs`. Nikdy si nevymýšlej čísla ani reference.
+   - Texty pro uživatele piš podle `ux-writing-en`, `ux-writing-cs` nebo `ux-writing-de` (podle jazyka) a pak je projeď odpovídajícím skillem `deslop-*`. Nikdy si nevymýšlej čísla ani reference.
    - Každá veřejná stránka má metadata podle `seo-metadata`; každá funkce pracující s osobními údaji se řídí `gdpr-privacy`.
    - Žádné natvrdo zapsané texty pro uživatele: překlady, plurály a formátování podle `i18n-setup`.
    - Každý endpoint, server action, webhook a upload projde `backend-security-auditor` včetně Security Gate.
@@ -344,9 +346,10 @@ metadata:
   a pro agenty/nástroje, které s ním umí pracovat. Claude Code ho ignoruje, nevadí mu.
 - Skill lze vyvolat i explicitně: *„Použij skill backend-security-auditor na app/api.“*
   nebo jako slash příkaz: `/deslop-cs README.cs.md`.
-- **Jazykové skilly** jsou v párech (`ux-writing-en` / `ux-writing-cs`, `deslop-en` / `deslop-cs`).
-  Každý je samostatný a jeho popis říká, pro jaký jazyk je určený, takže agent vybere ten
-  správný podle jazyka textu. Instrukce všech skillů jsou anglicky; české skilly mají české příklady.
+- **Jazykové skilly** jsou pro angličtinu, češtinu a němčinu (`ux-writing-en` / `-cs` / `-de`,
+  `deslop-en` / `-cs` / `-de`). Každý je samostatný a jeho popis říká, pro jaký jazyk je určený,
+  takže agent vybere ten správný podle jazyka textu. Instrukce všech skillů jsou anglicky; české
+  a německé skilly mají příklady ve svém jazyce.
 - Umístění: `./.claude/skills/<name>/SKILL.md` (projekt, sdílené přes git) nebo
   `~/.claude/skills/<name>/SKILL.md` (osobní, všechny projekty).
 
@@ -359,7 +362,7 @@ registruje dvě kontroly pro nástroje `Write`, `Edit` a `MultiEdit`:
 | Kontrola | Událost | Co dělá |
 |----------|---------|---------|
 | `secrets` | `PreToolUse` | **Zablokuje** úpravu, pokud nový text obsahuje něco, co vypadá jako tajná hodnota: privátní klíče, tokeny AWS/GitHub/GitLab/Slack/Stripe/Google/OpenAI/Anthropic/SendGrid/npm, JWT, hesla v connection stringu, natvrdo zapsané přihlašovací údaje. Lokální `.env` soubory přeskakuje, `.env.example` kontroluje. Hodnoty nikdy nevypisuje, jen typ a maskovaný začátek. |
-| `slop` | `PostToolUse` | **Nahlásí** Claudovi anglické a české AI obraty v Markdownu, HTML, textech, UI kódu a souborech s překlady; Claude je pak přepíše podle `deslop-en` / `deslop-cs`. Jednotlivá slova kontroluje jen v textových souborech, takže identifikátory v kódu jako `unlock()` ho nespustí. |
+| `slop` | `PostToolUse` | **Nahlásí** Claudovi anglické, české a německé AI obraty v Markdownu, HTML, textech, UI kódu a souborech s překlady; Claude je pak přepíše podle `deslop-en` / `deslop-cs` / `deslop-de`. Jednotlivá slova kontroluje jen v textových souborech, takže identifikátory v kódu jako `unlock()` ho nespustí. |
 
 - **Falešné poplachy:** přidejte na řádek `guard:allow` (např. `<!-- guard:allow -->` nebo `// guard:allow`).
   Soubor obsahující `slop-guard: off` kontrola AI obratů přeskočí; soubory `SKILL.md` přeskakuje vždy.

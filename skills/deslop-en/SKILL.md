@@ -1,6 +1,6 @@
 ---
 name: deslop-en
-description: "Editing pass that removes 'AI slop' from English text: buzzwords, filler, hedging, fake enthusiasm, formulaic structures (rule of three, 'it's not X, it's Y', em-dash overuse, emoji bullets, recap conclusions) and invented specifics, while keeping meaning, facts, links and code intact. Use on any English prose you write or edit — UI copy, landing pages, READMEs, docs, changelogs, PR descriptions, commit messages, emails, announcements — and whenever the user says 'deslop', 'it sounds like AI', 'make it sound human', 'tighten this' or 'rewrite this naturally'. For Czech text use deslop-cs instead."
+description: "Editing pass that removes 'AI slop' from English text: buzzwords, filler, hedging, fake enthusiasm, formulaic structures (rule of three, 'it's not X, it's Y', em-dash overuse, emoji bullets, recap conclusions) and invented specifics, while keeping meaning, facts, links and code intact. Use on any English prose you write or edit — UI copy, landing pages, READMEs, docs, changelogs, PR descriptions, commit messages, emails, announcements — and whenever the user says 'deslop', 'it sounds like AI', 'make it sound human', 'tighten this' or 'rewrite this naturally'. For Czech or German text use deslop-cs or deslop-de instead."
 triggers:
   - "deslop / /deslop-en <file>"
   - "it sounds like AI / ChatGPT"
@@ -23,7 +23,7 @@ statements, and verify that meaning and facts did not change.
 
 The goal is not to sound casual. The goal is text that is **specific, direct and true**.
 
-For Czech text use `deslop-cs`. In a mixed document, edit each part with the skill for its language.
+For Czech text use `deslop-cs`, for German `deslop-de`. In a mixed document, edit each part with the skill for its language.
 
 ## When to use
 
@@ -160,6 +160,6 @@ For files:
 ## Related skills
 
 - `ux-writing-en` — rules for writing English UI and web copy in the first place.
-- `deslop-cs` — the same pass for Czech text.
+- `deslop-cs`, `deslop-de` — the same pass for Czech and German text.
 - Vercel `writing-guidelines` (installed with `./install.sh --vercel`) — a full review of documentation against Vercel's writing handbook.
 - `frontend-design-guide` — the visual counterpart (no generic gradients, no emoji icons).

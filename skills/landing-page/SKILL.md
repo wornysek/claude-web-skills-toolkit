@@ -23,7 +23,7 @@ experiments**; the words come from `ux-writing-*`, the look from `frontend-desig
 
 1. **Define the page:** audience, where they come from (ad, search, email, social), the one primary action and its success metric.
 2. **Outline the sections** by what this visitor needs to believe before acting (section 2).
-3. **Write the copy** (`ux-writing-en` / `ux-writing-cs`, then `deslop-*`) and design it: a pattern and components per section from `component-registries`, tokens from `frontend-design-guide`, primitives from `shadcn-ui`, motion rules from `magic-animations`, the design loop from `impeccable-workflow`.
+3. **Write the copy** (`ux-writing-en` / `ux-writing-cs` / `ux-writing-de`, then `deslop-*`) and design it: a pattern and components per section from `component-registries`, tokens from `frontend-design-guide`, primitives from `shadcn-ui`, motion rules from `magic-animations`, the design loop from `impeccable-workflow`.
 4. **Build it fast and accessible** (`web-performance`, `a11y-auditor`), with metadata (`seo-metadata`).
 5. **Measure** the primary conversion with consent (section 5); **experiment** only with a hypothesis (section 6).
 
@@ -121,4 +121,4 @@ Not every page needs every section — pick by how much convincing the visitor n
 
 ## Related skills
 
-- `ux-writing-en` / `ux-writing-cs`, `deslop-*` (copy), `frontend-design-guide`, `shadcn-ui`, `magic-animations` (design), `ux-laws` (Hick, Von Restorff, Serial Position), `forms` (lead capture), `gdpr-privacy` (consent for analytics and experiments), `seo-metadata`, `web-performance`, `a11y-auditor`, `ecommerce` (pricing and legal).
+- `ux-writing-en` / `ux-writing-cs` / `ux-writing-de`, `deslop-*` (copy), `frontend-design-guide`, `shadcn-ui`, `magic-animations` (design), `ux-laws` (Hick, Von Restorff, Serial Position), `forms` (lead capture), `gdpr-privacy` (consent for analytics and experiments), `seo-metadata`, `web-performance`, `a11y-auditor`, `ecommerce` (pricing and legal).

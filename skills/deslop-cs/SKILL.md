@@ -1,6 +1,6 @@
 ---
 name: deslop-cs
-description: "Editing pass that removes 'AI slop' from Czech text (texty v češtině): buzzwords and empty phrases, calques from English ('odemkněte', 'adresovat problém', 'dává smysl'), officialese and nominal style ('za účelem', 'dochází k', 'provést úpravu'), formulaic structures, English typography in Czech text and invented specifics, while keeping meaning, facts, links and code intact. Use on any Czech prose you write or edit — UI texts, web copy, README, documentation, emails, announcements, social posts — and whenever the user says 'deslop', 'zní to jako AI', 'přepiš to lidsky', 'zkrať to' or 'zní to jako překlad'. For English text use deslop-en instead."
+description: "Editing pass that removes 'AI slop' from Czech text (texty v češtině): buzzwords and empty phrases, calques from English ('odemkněte', 'adresovat problém', 'dává smysl'), officialese and nominal style ('za účelem', 'dochází k', 'provést úpravu'), formulaic structures, English typography in Czech text and invented specifics, while keeping meaning, facts, links and code intact. Use on any Czech prose you write or edit — UI texts, web copy, README, documentation, emails, announcements, social posts — and whenever the user says 'deslop', 'zní to jako AI', 'přepiš to lidsky', 'zkrať to' or 'zní to jako překlad'. For English or German text use deslop-en or deslop-de instead."
 triggers:
   - "deslop / /deslop-cs <soubor>"
   - "zní to jako AI / ChatGPT / jako překlad"
@@ -119,7 +119,7 @@ Czech AI text loves nouns and passive voice. Turn them back into verbs.
 - **Keep the author's voice, terminology and form of address.** Don't add jokes or opinions.
 - **Meaning is sacred:** facts, links, code, commands, numbers and quotes stay exactly as they were.
 - **Context matters:** „komplexní číslo“ in mathematics or „robustní“ in statistics is a term, not slop.
-- **Never translate during deslop.** Czech stays Czech; English parts go to `deslop-en`.
+- **Never translate during deslop.** Czech stays Czech; English parts go to `deslop-en`, German parts to `deslop-de`.
 - **Check grammar after rewriting:** declension, agreement with numbers, gender.
 
 ## Grep helper
@@ -181,5 +181,5 @@ For files:
 ## Related skills
 
 - `ux-writing-cs` — rules for writing Czech UI and web copy in the first place.
-- `deslop-en` — the same pass for English text.
+- `deslop-en`, `deslop-de` — the same pass for English and German text.
 - `frontend-design-guide` — the visual counterpart.

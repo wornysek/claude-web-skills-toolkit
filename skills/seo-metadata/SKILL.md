@@ -36,7 +36,7 @@ sets the technical baseline. It does not cover keyword research or link building
 - **Unique per page.** A title template keeps the brand at the end: `Pricing · Acme`.
 - **Title:** about 50–60 characters, the most specific words first. No keyword stuffing.
 - **Description:** about 140–160 characters, a real summary that makes someone click. It is not a ranking factor, but it is the snippet people read.
-- Write both following `ux-writing-en` / `ux-writing-cs` and run the `deslop-en` / `deslop-cs` pass — generic marketing descriptions are ignored by users and often rewritten by search engines.
+- Write both following `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` and run the `deslop-en` / `deslop-cs` / `deslop-de` pass — generic marketing descriptions are ignored by users and often rewritten by search engines.
 - The visible `<h1>` and the `<title>` describe the same thing, but don't have to be identical.
 
 ## 2. The Metadata API (Next.js App Router)
@@ -227,7 +227,7 @@ export const metadata: Metadata = {
 ```
 
 - `<html lang>` matches the page language; `openGraph.locale` uses the `en_US` / `cs_CZ` format.
-- Translated metadata follows the language's writing skill (`ux-writing-en` / `ux-writing-cs`).
+- Translated metadata follows the language's writing skill (`ux-writing-en` / `ux-writing-cs` / `ux-writing-de`).
 - Locale routing, message files and a `generateMetadata` example with `getPathname` per locale: `i18n-setup`.
 
 ## 7. Structured data (JSON-LD)
@@ -356,7 +356,7 @@ curl -s https://example.com/sitemap.xml | head -40
 
 ## Related skills
 
-- `ux-writing-en` / `ux-writing-cs` and `deslop-en` / `deslop-cs` — titles, descriptions and on-page copy.
+- `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` and `deslop-en` / `deslop-cs` / `deslop-de` — titles, descriptions and on-page copy.
 - `frontend-design-guide` — OG image design with the project's tokens.
 - `chrome-devtools` — Lighthouse and Core Web Vitals in a real browser.
 - `backend-security-auditor` — JSON-LD and any user-provided metadata are untrusted input.

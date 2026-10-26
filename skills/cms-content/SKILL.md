@@ -191,4 +191,4 @@ export async function GET(req: Request) {
 
 ## Related skills
 
-- `seo-metadata` (metadata, sitemap, structured data, redirects), `ux-writing-en` / `ux-writing-cs` and `deslop-*` (content quality), `i18n-setup` (localized routes), `frontend-security` (MDX and HTML safety), `web-performance` (images, static delivery), `a11y-auditor` (alt text, headings), `tech-stack-advisor` (CMS choice).
+- `seo-metadata` (metadata, sitemap, structured data, redirects), `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` and `deslop-*` (content quality), `i18n-setup` (localized routes), `frontend-security` (MDX and HTML safety), `web-performance` (images, static delivery), `a11y-auditor` (alt text, headings), `tech-stack-advisor` (CMS choice).

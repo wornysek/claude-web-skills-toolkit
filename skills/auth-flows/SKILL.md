@@ -24,7 +24,7 @@ security rules every implementation must pass are in `backend-security-auditor`
 
 1. **Choose the methods** for the audience (section 1) and **a library or provider** (section 2).
 2. **Design every flow**, including the unhappy paths: sign-up, sign-in, recovery, changes, sign-out (sections 3–9).
-3. **Write the copy** with `ux-writing-en` / `ux-writing-cs`; build forms per `forms`.
+3. **Write the copy** with `ux-writing-en` / `ux-writing-cs` / `ux-writing-de`; build forms per `forms`.
 4. **Review** with `backend-security-auditor`, **test** each flow end to end (`webapp-testing`).
 
 ---
@@ -198,4 +198,4 @@ export function generateRecoveryCodes(count = 10) {
 
 ## Related skills
 
-- `backend-security-auditor` (A1–A6), `forms` (sign-in and sign-up forms), `transactional-email` (verification, reset and notification emails), `ux-writing-en` / `ux-writing-cs` (auth copy), `a11y-auditor` (accessible authentication 3.3.8), `gdpr-privacy` (consent, account deletion), `tech-stack-advisor` (library vs. provider).
+- `backend-security-auditor` (A1–A6), `forms` (sign-in and sign-up forms), `transactional-email` (verification, reset and notification emails), `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` (auth copy), `a11y-auditor` (accessible authentication 3.3.8), `gdpr-privacy` (consent, account deletion), `tech-stack-advisor` (library vs. provider).

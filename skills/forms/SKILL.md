@@ -48,7 +48,7 @@ export type ContactInput = z.infer<typeof ContactSchema>;
 
 - The **server always validates again** — client validation is UX only (`backend-security-auditor` C1).
 - Normalize before validating (trim, lowercase emails, strip spaces from phone numbers — Postel's law in `ux-laws`).
-- Messages say how to fix the problem (`ux-writing-en` / `ux-writing-cs`); with i18n they are translation keys (`i18n-setup`).
+- Messages say how to fix the problem (`ux-writing-en` / `ux-writing-cs` / `ux-writing-de`); with i18n they are translation keys (`i18n-setup`).
 
 ## 2. Choosing the approach
 
@@ -242,4 +242,4 @@ export async function verifyTurnstile(token: string | null, remoteIp?: string) {
 
 ## Related skills
 
-- `ux-writing-en` / `ux-writing-cs` (labels, hints, errors), `ux-laws` (Hick, Miller, Postel, Feedback), `a11y-auditor` (form accessibility), `shadcn-ui` (field components), `backend-security-auditor` (validation, mass assignment, uploads), `webapp-testing` (form matrix), `auth-flows` (sign-in and sign-up forms).
+- `ux-writing-en` / `ux-writing-cs` / `ux-writing-de` (labels, hints, errors), `ux-laws` (Hick, Miller, Postel, Feedback), `a11y-auditor` (form accessibility), `shadcn-ui` (field components), `backend-security-auditor` (validation, mass assignment, uploads), `webapp-testing` (form matrix), `auth-flows` (sign-in and sign-up forms).
