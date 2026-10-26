@@ -8,9 +8,9 @@
 #      Local .env files are skipped; .env.example / .env.sample are checked.
 #
 #  slop     (PostToolUse, Write|Edit|MultiEdit)
-#      Reports typical AI writing tells (English, Czech, German) in the new text of
+#      Reports typical AI writing tells (English, Czech, German, Ukrainian) in the new text of
 #      prose and UI files back to Claude, so it can rewrite them with the
-#      deslop-en / deslop-cs / deslop-de skills. The edit itself is not undone.
+#      deslop-en / deslop-cs / deslop-de / deslop-uk skills. The edit itself is not undone.
 #
 #  Exit codes follow the Claude Code hook contract:
 #      0  nothing found
@@ -181,10 +181,13 @@ check_slop() {
   local words_cs="revoluční|inovativní|nepostradateln|realizova|za účelem|dochází k"
   local phrases_de="in der heutigen (schnelllebigen|digitalen)|tauchen wir ein|lassen sie uns eintauchen|auf das nächste level|zögern sie nicht|zusammenfassend lässt sich|es ist wichtig zu beachten|von entscheidender bedeutung|integraler bestandteil|macht sinn|sinn machen|am ende des tages|einen unterschied machen|erschließen sie das volle potenzial"
   local words_de="bahnbrechend|revolutionär|nahtlos|ganzheitlich|maßgeschneidert|synergien"
+  # Cyrillic is not case-folded in the C locale, so capitalized variants are listed explicitly.
+  local phrases_uk="(У|у) сучасному (швидкоплинному|цифровому) світі|(З|з)ануримося|(В|в)арто зазначити|на новий рівень|(Н|н)е соромтеся|(П|п)ідсумовуючи|(С|с)подіваюся, це допоможе|відіграє ключову роль|(Р|р)озкрийте (весь )?потенціал|приймати участь|приймає участь|(^| |«|„|[(])являється|на протязі|(Д|д)обро пожалувати"
+  local words_uk="(Б|б)езшовн|(Р|р)еволюційн|(І|і)нноваційн"
 
-  local pattern="${phrases_en}|${phrases_cs}|${phrases_de}"
+  local pattern="${phrases_en}|${phrases_cs}|${phrases_de}|${phrases_uk}"
   if (( prose )); then
-    pattern="${pattern}|(^|[^a-z])(${words_en})([^a-z]|$)|${words_cs}|${words_de}"
+    pattern="${pattern}|(^|[^a-z])(${words_en})([^a-z]|$)|${words_cs}|${words_de}|${words_uk}"
   fi
 
   printf '%s\n' "${NEW_TEXT}" | grep -iqE -- "${pattern}" || exit 0
@@ -212,7 +215,7 @@ check_slop() {
   {
     echo "slop-guard: possible AI writing tells in ${FILE_PATH}:"
     printf '%s\n' "${report}"
-    echo "Rewrite these with the deslop-en / deslop-cs / deslop-de skill (keep facts, links and code unchanged)."
+    echo "Rewrite these with the matching deslop-en / -cs / -de / -uk skill (keep facts, links and code unchanged)."
     echo "If a use is legitimate (a technical term, a quote), keep it and add 'guard:allow' to the line."
   } >&2
   exit 2
