@@ -1,6 +1,6 @@
 ---
 name: frontend-design-guide
-description: "Rules for building premium UI without the generic 'AI slop' look: typography and font choice, color harmony and contrast (no generic purple gradients), mandatory skeletons, well-crafted empty/error states, micro-interactions and a Tailwind CSS + shadcn/ui + Lucide icons architecture. Use whenever you create or modify a page, component, landing page, dashboard, form or design system in React/Next.js."
+description: "Rules for building premium UI without the generic 'AI slop' look: typography and font choice, color harmony and contrast (no generic purple gradients), mandatory skeletons, well-crafted empty/error states, micro-interactions and a Tailwind CSS + shadcn/ui + Lucide icons architecture. Use whenever you create or modify a page, component, landing page, dashboard, form or design system in React/Next.js or Astro."
 triggers:
   - "build a page / component / landing page / dashboard"
   - "make it prettier / more modern / more professional"
@@ -49,7 +49,7 @@ aesthetic direction; this file covers **concrete implementation standards** and 
 | Gaming, entertainment, energetic | Sora, Outfit | Space Grotesk, Clash Display |
 | Friendly, consumer | DM Sans, Nunito Sans | Bricolage Grotesque |
 
-- Load fonts via `next/font` (self-hosting, no layout shift, `display: "swap"`), not via a `<link>` to Google Fonts.
+- Load fonts via `next/font` (self-hosting, no layout shift, `display: "swap"`) or the Astro Fonts API (below), not via a `<link>` to Google Fonts.
 - Fonts must support the **diacritics of your target languages** (`subsets: ["latin", "latin-ext"]` for Central European languages, plus `"cyrillic"` for Ukrainian — many display fonts are Latin-only).
 
 ```tsx
@@ -67,6 +67,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   );
 }
 ```
+
+**Astro** has its own Fonts API instead of `next/font`, with the same self-hosting, preloading and fallback metrics:
+
+```js
+// astro.config.mjs
+import { defineConfig, fontProviders } from "astro/config";
+
+export default defineConfig({
+  fonts: [
+    { provider: fontProviders.fontsource(), name: "Manrope", cssVariable: "--font-manrope", subsets: ["latin", "latin-ext"] },
+    { provider: fontProviders.fontsource(), name: "Space Grotesk", cssVariable: "--font-space-grotesk", subsets: ["latin", "latin-ext"] },
+  ],
+});
+```
+
+```astro
+---
+// src/layouts/Layout.astro
+import { Font } from "astro:assets";
+---
+<head>
+  <Font cssVariable="--font-manrope" preload />
+  <Font cssVariable="--font-space-grotesk" />
+</head>
+```
+
+The variables map to Tailwind in `@theme inline` exactly as with `next/font` (see Tokens below).
 
 ### Typography rules
 - A scale with a fixed ratio (e.g. 1.25): `text-sm` 14 → `text-base` 16 → `text-xl` 20 → `text-2xl` 24 → `text-3xl` 30 → `text-5xl` 48.
@@ -158,7 +185,7 @@ the accent, noise/grain, a radial light in the hero section) and you can explain
 }
 
 @theme inline {
-  /* Variables from next/font have their own names to avoid a circular reference */
+  /* Font variables (next/font or the Astro Fonts API) have their own names to avoid a circular reference */
   --font-sans: var(--font-manrope);
   --font-display: var(--font-space-grotesk);
   --radius-sm: calc(var(--radius) - 4px);
@@ -320,6 +347,7 @@ export function SubmitButton({ pending, children }: { pending: boolean; children
 - **Lucide** (`lucide-react`) — the only icon set in the project.
 - `cn()` from `lib/utils.ts` (`clsx` + `tailwind-merge`) for composing classes.
 - Component variants via `class-variance-authority` (cva), not via conditional class strings.
+- **Astro:** shadcn/ui and the React registries work through `@astrojs/react` (shadcn has an Astro installation guide). React components render to static HTML unless they get a `client:*` directive, so interactive ones (dialog, dropdown menu, tabs, forms) need one — prefer `client:visible` or `client:idle` (`web-performance`). Islands don't share React context: an interactive area with shared state is one component. Pages and layouts live in `src/pages/` and `src/layouts/`; `components/ui/` stays the same.
 
 ### Structure
 
@@ -354,7 +382,7 @@ lib/
 ## Pre-delivery checklist
 
 - [ ] The aesthetic direction is named and the whole UI follows it.
-- [ ] Fonts: max. 2 families, `next/font`, `latin-ext` where needed, type scale followed.
+- [ ] Fonts: max. 2 families, `next/font` or the Astro Fonts API, `latin-ext` where needed, type scale followed.
 - [ ] None of the forbidden patterns from the "anti-AI slop" section.
 - [ ] Colors only via semantic tokens; AA contrast verified in light and dark mode.
 - [ ] Every data view has a skeleton, an empty state (all relevant variants) and an error state.

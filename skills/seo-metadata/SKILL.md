@@ -1,6 +1,6 @@
 ---
 name: seo-metadata
-description: "Technical SEO and sharing metadata for web apps (Next.js App Router first, principles apply to any framework): titles and descriptions, the Metadata API, canonical URLs, Open Graph and social images, robots and noindex rules, sitemap.xml and robots.txt, hreflang for multilingual sites, JSON-LD structured data (with safe serialization), semantic HTML, status codes, redirects and verification. Use whenever you create or change a public page, a layout, routing, a blog or product page, a multilingual setup, or when the user asks about SEO, metadata, OG images, sharing previews, sitemap, robots or rich results."
+description: "Technical SEO and sharing metadata for web apps (Next.js App Router first, with Astro equivalents; principles apply to any framework): titles and descriptions, the Metadata API, canonical URLs, Open Graph and social images, robots and noindex rules, sitemap.xml and robots.txt, hreflang for multilingual sites, JSON-LD structured data (with safe serialization), semantic HTML, status codes, redirects and verification. Use whenever you create or change a public page, a layout, routing, a blog or product page, a multilingual setup, or when the user asks about SEO, metadata, OG images, sharing previews, sitemap, robots or rich results."
 triggers:
   - "SEO / meta tags / title and description"
   - "Open Graph / OG image / Twitter card / sharing preview"
@@ -109,7 +109,7 @@ export default async function PostPage({ params }: Props) {
 ```
 
 - `generateMetadata` and the page can share one cached data call (`React.cache` or the framework's fetch cache) — don't fetch twice.
-- Other frameworks: the same fields as `<title>`, `<meta name="description">`, `<link rel="canonical">`, `<meta property="og:*">` in the server-rendered `<head>`.
+- Other frameworks: the same fields as `<title>`, `<meta name="description">`, `<link rel="canonical">`, `<meta property="og:*">` in the server-rendered `<head>`. Astro: section 11.
 
 ## 3. Open Graph and social images
 
@@ -323,12 +323,55 @@ curl -s https://example.com/sitemap.xml | head -40
 - Social preview debuggers of the platforms you care about for OG images.
 - Search Console (or the equivalent for your market): submit the sitemap, watch coverage and Core Web Vitals reports.
 
+## 11. Astro equivalents
+
+Astro has no Metadata API: the base layout renders the `<head>` from props. The rules in
+sections 1–10 stay the same.
+
+```astro
+---
+// src/components/BaseHead.astro — rendered inside <head> by every layout
+interface Props {
+  title: string;
+  description: string;
+  image?: string; // path of the OG image, e.g. "/og/pricing.png"
+  noindex?: boolean;
+}
+
+const { title, description, image = "/og/default.png", noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site); // needs `site` in astro.config.mjs
+const ogImage = new URL(image, Astro.site);
+---
+<title>{`${title} · Acme`}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+<meta property="og:type" content="website" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta name="twitter:card" content="summary_large_image" />
+```
+
+| Topic | Next.js | Astro |
+|-------|---------|-------|
+| Absolute URLs | `metadataBase` | `site` in `astro.config.mjs`, `Astro.site` in components |
+| Sitemap | `app/sitemap.ts` | `@astrojs/sitemap` (`npx astro add sitemap`, needs `site`): `filter()` drops noindex and private pages, `serialize()` sets a real `lastmod` per URL, `i18n` adds hreflang links |
+| robots.txt | `app/robots.ts` | `public/robots.txt`, or an endpoint `src/pages/robots.txt.ts` when it depends on the environment |
+| OG images | `opengraph-image.tsx` with `next/og` | an endpoint such as `src/pages/og/[slug].png.ts` that renders with Satori and resvg (the libraries behind `next/og`) at build time, or a community integration |
+| hreflang | `alternates.languages` | `<link rel="alternate" hreflang="…">` in `BaseHead`, built with `getAbsoluteLocaleUrl()` from `astro:i18n` (routing: `i18n-setup`) |
+| JSON-LD | the `JsonLd` component | `<script type="application/ld+json" set:html={JSON.stringify(data).replace(/</g, "\\u003c")} />` — Astro leaves scripts with attributes unprocessed |
+| Redirects | `redirects()` in `next.config.ts` | `redirects` in `astro.config.mjs` — **a static build without an adapter emits a `<meta http-equiv="refresh">` page with no 301/308 status**; for SEO use an adapter or the host's redirect rules |
+| 404 | `notFound()` | `src/pages/404.astro`; on-demand routes `return Astro.rewrite("/404")` or set `Astro.response.status = 404`; missing static routes are simply not generated |
+| Staging noindex | middleware or host headers | host headers (`X-Robots-Tag`), or `src/middleware.ts` for routes rendered on demand |
+
 ---
 
 ## Checklist
 
 - [ ] Every public page has a unique title (template with brand) and a real description.
-- [ ] `metadataBase` is set; canonicals are absolute and consistent.
+- [ ] `metadataBase` (Astro: `site`) is set; canonicals are absolute and consistent.
 - [ ] Every public page has an OG image (1200 × 630) and `twitter.card = summary_large_image`.
 - [ ] Private segments (app, admin, auth, checkout) have `robots: { index: false }`.
 - [ ] Staging and previews send `X-Robots-Tag: noindex` (verified with `curl -I`).

@@ -47,6 +47,8 @@ Budgets — starting points, adjust per project and record them in the repo:
 4. **Verify** in the lab, then watch the field data after release.
 5. **Protect** the result with budgets in CI (section 9).
 
+Code examples use Next.js; for Astro projects use the equivalents in section 10.
+
 ---
 
 ## 1. Measuring
@@ -181,12 +183,29 @@ export async function processInChunks<T>(items: T[], work: (item: T) => void, ch
 - Add a bundle-size check (e.g. `size-limit`) so a new dependency can't silently add 100 KB.
 - Lab scores fluctuate — use several runs and watch trends, and keep the field data dashboard as the final judge.
 
+## 10. Astro equivalents
+
+The rules above don't depend on the framework; only the APIs differ. In an Astro project:
+
+| Topic | Next.js | Astro |
+|-------|---------|-------|
+| Real-user metrics | `useReportWebVitals` | the `web-vitals` library in a `<script>` in the base layout (Astro bundles it as a module) |
+| LCP image | `next/image` + `priority` | `<Image>` / `<Picture>` from `astro:assets` + `priority` (sets `loading="eager"` and `fetchpriority="high"`); import local images from `src/` so width and height are known |
+| Remote images | `images.remotePatterns` | `image.remotePatterns` in `astro.config.mjs` |
+| Fonts | `next/font` | the Fonts API: `fonts` in `astro.config.mjs` + `<Font cssVariable="…" preload />` in the head (`frontend-design-guide`) |
+| Client JavaScript | Server Components, `"use client"` leaves | no JavaScript by default; a framework component ships JS only with a `client:*` directive — prefer `client:visible` or `client:idle`, use `client:load` only for what must work immediately |
+| Slow parts of a page | `Suspense` streaming | server islands: `server:defer` with a `slot="fallback"` placeholder (needs an adapter) |
+| Rendering per route | static, ISR, dynamic | static by default; `export const prerender = false` for routes rendered on demand (needs an adapter) |
+| Third-party scripts | `next/script` with `lazyOnload` | load them from your own script after interaction or idle; Partytown (`npx astro add partytown`) can move some to a web worker — test every script there |
+| Lighthouse CI server | `npm run start` (port 3000) | `npm run preview` (`astro preview`, port 4321) |
+
 ## Checklist
 
 - [ ] Field data (RUM or CrUX) is collected; p75 LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1 on key pages.
 - [ ] The LCP element is in the initial HTML; the LCP image has high priority, correct size and format.
 - [ ] Fonts self-hosted, subset, few files; no icon fonts.
 - [ ] Interactive code is split; heavy features loaded on demand; the bundle analyzed after new dependencies.
+- [ ] Astro: every island has the latest sensible `client:*` directive — no `client:load` by habit.
 - [ ] Third-party scripts minimal, loaded late, behind consent where required; heavy embeds behind facades.
 - [ ] No long tasks on interaction; feedback immediate; long lists virtualized.
 - [ ] Media has dimensions; late content has reserved space; nothing pushes content down.

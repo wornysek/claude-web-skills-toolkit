@@ -24,6 +24,8 @@ ends in **one recommendation, one alternative and a written decision**.
 The defaults below reflect what the toolkit's other skills assume (React, Next.js,
 Tailwind CSS, shadcn/ui, Postgres, TypeScript). They are starting points, not rules —
 the requirements decide.
+When Astro is chosen, `frontend-design-guide`, `web-performance` and `seo-metadata` list
+the Astro equivalents (Fonts API, `astro:assets`, islands, head and sitemap).
 
 ## Process
 
