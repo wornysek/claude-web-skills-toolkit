@@ -69,7 +69,7 @@ claude-web-skills-toolkit/
 ├── hooks/
 │   ├── slop-secrets-guard.sh      # hook pro Claude Code: blokuje tajné hodnoty, hlásí AI obraty
 │   └── settings.example.json      # registrace hooku pro .claude/settings.json
-└── skills/                        # 38 skillů, každý ve složce se SKILL.md (viz tabulky níže)
+└── skills/                        # 40 skillů, každý ve složce se SKILL.md (viz tabulky níže)
     ├── a11y-auditor/
     ├── ai-features/
     └── …
@@ -98,6 +98,8 @@ nainstalujete příkazem `cp -R skills/<název> .claude/skills/`, všechny najed
 | [`a11y-auditor`](skills/a11y-auditor/SKILL.md) | Přístupnost (WCAG 2.2 AA, EAA): klávesnice, čtečky obrazovky, dialogy a vlastní widgety, prohlášení o přístupnosti |
 | [`landing-page`](skills/landing-page/SKILL.md) | Landing page, úvodní, produktové a ceníkové stránky; konverze; A/B testy |
 | [`pwa-mobile`](skills/pwa-mobile/SKILL.md) | Telefony a tablety, dotykové ovládání, manifest, offline režim, instalace, push notifikace |
+| [`svg-graphics`](skills/svg-graphics/SKILL.md) | Ikony, ilustrace, vzory, návrhy log, favicony a animace v SVG; SVGO, SVGR, SVG nahrané uživateli |
+| [`visual-assets`](skills/visual-assets/SKILL.md) | Fotky a obrázky, obrázky generované AI, mockupy ze skutečných screenshotů, video, Lottie, Rive, 3D |
 
 ### Texty a obsah
 

@@ -232,4 +232,4 @@ The rules above don't depend on the framework; only the APIs differ. In an Astro
 
 ## Related skills
 
-- `chrome-devtools` (traces and insights), `frontend-design-guide` (skeletons, motion), `magic-animations` (animation budget), `seo-metadata` (rendering for search), `database-design` (slow queries), `deploy-and-ops` (CI, CDN, caching).
+- `chrome-devtools` (traces and insights), `visual-assets` (image pipeline, video, Lottie, 3D), `svg-graphics` (SVG size and embedding), `frontend-design-guide` (skeletons, motion), `magic-animations` (animation budget), `seo-metadata` (rendering for search), `database-design` (slow queries), `deploy-and-ops` (CI, CDN, caching).

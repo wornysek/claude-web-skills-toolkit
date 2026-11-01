@@ -89,7 +89,7 @@ export default function manifest(): MetadataRoute.Manifest {
 }
 ```
 
-- Icons: 192 and 512 px, a **maskable** version with safe padding, an Apple touch icon (`apple-icon.png` / 180 px).
+- Icons: 192 and 512 px, a **maskable** version with safe padding, an Apple touch icon (`apple-icon.png` / 180 px) — exported from one SVG source (`svg-graphics`).
 - `theme_color` matches the design tokens in light and dark mode (`<meta name="theme-color" media="(prefers-color-scheme: dark)">`).
 - An install prompt appears **after** the user got value (e.g. after the third visit or a completed task), never on first load. On iOS, explain "Share → Add to Home Screen".
 - Installed apps open without browser UI: the app needs its own back navigation and visible sign-out.

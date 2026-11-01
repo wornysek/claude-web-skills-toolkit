@@ -69,7 +69,7 @@ claude-web-skills-toolkit/
 ├── hooks/
 │   ├── slop-secrets-guard.sh      # Claude Code hook: blocks secrets, flags AI writing tells
 │   └── settings.example.json      # hook registration for .claude/settings.json
-└── skills/                        # 38 skills, each a folder with a SKILL.md (see the tables below)
+└── skills/                        # 40 skills, each a folder with a SKILL.md (see the tables below)
     ├── a11y-auditor/
     ├── ai-features/
     └── …
@@ -95,6 +95,8 @@ manually with `cp -R skills/<name> .claude/skills/`, or all of them with `./inst
 | [`a11y-auditor`](skills/a11y-auditor/SKILL.md) | Accessibility (WCAG 2.2 AA, EAA): keyboard, screen readers, dialogs and custom widgets, accessibility statement |
 | [`landing-page`](skills/landing-page/SKILL.md) | Landing, home, product and pricing pages; conversion; A/B tests |
 | [`pwa-mobile`](skills/pwa-mobile/SKILL.md) | Phones and tablets, touch, manifest, offline mode, installability, push notifications |
+| [`svg-graphics`](skills/svg-graphics/SKILL.md) | Icons, illustrations, patterns, logo drafts, favicons and SVG animation; SVGO, SVGR, user-uploaded SVG |
+| [`visual-assets`](skills/visual-assets/SKILL.md) | Photos and images, AI-generated images, mockups from real screenshots, video, Lottie, Rive, 3D |
 
 ### Text and content
 

@@ -526,7 +526,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 ```
 
 - Also set a body size limit at the infrastructure level (reverse proxy `client_max_body_size`, `serverActions.bodySizeLimit`, `express.json({ limit: "100kb" })`).
-- **No SVG or HTML** from users (stored XSS). If they are required, sanitize them and serve them from a different domain.
+- **No SVG or HTML** from users (stored XSS). If they are required, sanitize them and serve them from a different domain (for SVG: rasterize or sanitize — `svg-graphics` section 9).
 - Files are stored outside the web root (object storage) and served with `X-Content-Type-Options: nosniff`, and non-previewable types with `Content-Disposition: attachment`.
 - Documents (PDF, office files) are scanned for malware before anyone else downloads them.
 

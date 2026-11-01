@@ -227,3 +227,4 @@ export function Hero() {
 - `frontend-design-guide` — the aesthetic direction and tokens the component is adapted to.
 - `shadcn-ui` — the base primitives (Button, Card) under animated components.
 - `chrome-devtools` — measuring the impact of animations on LCP/CLS/INP and checking the console.
+- `svg-graphics` (SVG line drawing and transforms) and `visual-assets` (Lottie, Rive, video, 3D) — animated assets.

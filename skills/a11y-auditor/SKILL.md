@@ -88,7 +88,7 @@ tested library component.
 - Every interactive element has an **accessible name** that contains its visible label (2.5.3).
 - **Icon-only buttons:** `aria-label="Close"` or `<span className="sr-only">Close</span>`; the icon gets `aria-hidden="true"`.
 - **Images:** `alt` describes the purpose ("Chart: revenue grew 12 % in Q3"); decorative images get `alt=""`; images of text are avoided (1.4.5).
-- **SVG:** decorative → `aria-hidden="true"`; meaningful → `role="img"` with `aria-label` or `<title>`.
+- **SVG:** decorative → `aria-hidden="true"`; meaningful → `role="img"` with `aria-label` or `<title>` (patterns in `svg-graphics`).
 - **Link purpose** is clear from the text or its context (2.4.4) — no "click here", no repeated "Read more" without context (`aria-label` or visually hidden text).
 
 ## 5. Forms
