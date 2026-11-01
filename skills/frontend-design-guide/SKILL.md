@@ -35,6 +35,35 @@ aesthetic direction; this file covers **concrete implementation standards** and 
 
 ---
 
+## Starting points by product type
+
+When the brand has no direction yet, start from the product type — then make it specific
+to this product. A starting point, not a rule: a fintech can be playful if that is the
+deliberate idea. Hues are OKLCH hue angles for the tokens below; every color pair still
+meets the contrast thresholds in `a11y-auditor`, and the fonts must cover the target
+languages (check `latin-ext`, and `cyrillic` for Ukrainian — of the fonts below, Geist,
+IBM Plex, Source Sans 3, Source Serif 4, Manrope, Nunito and Cormorant Garamond include it).
+
+| Product type | Direction | Palette (OKLCH) | Fonts (text / display) | Avoid |
+|--------------|-----------|-----------------|------------------------|-------|
+| Fintech, banking, insurance | calm, precise, trustworthy | cool blue 230–260 or green 150–165 at low chroma, one accent; gains and losses with text, not color alone | IBM Plex Sans / IBM Plex Mono for figures (`tabular-nums`) | neon, bouncy motion, purple "crypto" gradients |
+| Healthcare, clinic, pharmacy | clean, calm, very legible | teal or blue-green 180–210, warm neutral surfaces | Source Sans 3 / Source Serif 4 | red as the main accent (reads as an alarm), dense layouts, small text |
+| SaaS, B2B, developer tool | technical, dense, focused | tinted grays + one saturated accent | Geist / Geist Mono | the purple-blue gradient, three identical icon cards, fake customer logos |
+| AI product | concrete, product-first | any hue except the violet 280–300 cliché; real output on screen | Geist or Satoshi / a mono for prompts and output | sparkles, glowing orbs, "magic" without a demo |
+| E-commerce: fashion, luxury | editorial, lots of space | near-monochrome, one warm or metallic accent (hue 60–90, low chroma) | DM Sans / Instrument Serif or Fraunces | badges on every product, fake countdowns (`ecommerce`) |
+| E-commerce: general, marketplace | fast, scannable | neutral UI, the accent only on actions; product photos carry the color | Plus Jakarta Sans / the same family in bold | competing accent colors, carousels as navigation |
+| Food, restaurant, café | warm, appetizing, local | warm hues 30–80 (terracotta, mustard, olive), cream surfaces | DM Sans / Fraunces or Bricolage Grotesque | cold blue, tiny food photos, the menu as a PDF |
+| Travel, hospitality, real estate | photo-led, airy | neutral UI that lets the photos lead; accent from the brand or the place | Manrope / Newsreader | colors fighting the photos, text on busy photos without a scrim |
+| Education, kids, e-learning | friendly, clear, encouraging | brighter accents (still AA), lots of white space | Lexend or Nunito / the same | low-contrast pastels, small text, cluttered gamification |
+| Gaming, entertainment, events | energetic, bold | dark tinted surfaces, one vivid accent at high chroma | Sora / Space Grotesk or Clash Display | unreadable text effects, autoplaying sound, an effect in every section |
+| Legal, consulting, advisory | authoritative, restrained | ink navy or deep green, warm paper neutrals | IBM Plex Sans / Source Serif 4 or Newsreader | trendy glassmorphism, stock gavels and handshakes |
+| Public sector, nonprofit | accessible above all | high contrast, plain, one accent | Atkinson Hyperlegible Next / Public Sans | decorative motion, low contrast, text in images |
+| Wellness, beauty, spa | soft, calm, premium | muted warm hues 20–60 at low chroma, generous space | Manrope / Cormorant Garamond | neon, harsh effects (text still meets AA) |
+| Local services, crafts, trades | honest, practical, local | one strong brand color, warm neutrals, real photos of the work | Outfit or DM Sans / the same family | stock photos, invented reviews, "we are passionate about quality" copy |
+| Portfolio, agency, studio | distinctive, one bold idea | anything deliberate; monochrome + one accent works well | Instrument Serif / Geist Mono, or one expressive display font | the template look, five fonts, effects instead of work |
+
+With Impeccable installed, `shape`, `colorize` and `typeset` refine this further (`impeccable-workflow`).
+
 ## 1. Typography
 
 ### Choosing fonts
@@ -370,6 +399,7 @@ lib/
 - A consistent stroke width across the project (default 2, for a fine style `strokeWidth={1.5}` everywhere).
 - Decorative icon: `aria-hidden="true"`. Icon-only button: `aria-label` (or `<span className="sr-only">`).
 - Import individual icons (`import { Inbox } from "lucide-react"`), never the whole package.
+- An icon Lucide doesn't have is drawn to Lucide's grid (`svg-graphics`); illustrations, photos and mockups: `svg-graphics` and `visual-assets`.
 
 ### Layout and spacing
 - Spacing only from the Tailwind scale (4px step); no arbitrary values except justified exceptions.
