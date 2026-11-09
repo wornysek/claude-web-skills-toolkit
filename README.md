@@ -69,7 +69,7 @@ claude-web-skills-toolkit/
 ├── hooks/
 │   ├── slop-secrets-guard.sh      # Claude Code hook: blocks secrets, flags AI writing tells
 │   └── settings.example.json      # hook registration for .claude/settings.json
-└── skills/                        # 40 skills, each a folder with a SKILL.md (see the tables below)
+└── skills/                        # 43 skills, each a folder with a SKILL.md (see the tables below)
     ├── a11y-auditor/
     ├── ai-features/
     └── …
@@ -82,7 +82,8 @@ tool itself (plugin, MCP server) is installed with `install.sh` or manually.
 
 ## Skills and tools
 
-All custom skills are by claude-web-skills-toolkit under the MIT license. Install one
+All custom skills are by claude-web-skills-toolkit under the MIT license (the planning skills
+are adapted from Matt Pocock's MIT-licensed skills, see their `NOTICE.md`). Install one
 manually with `cp -R skills/<name> .claude/skills/`, or all of them with `./install.sh --skills`.
 
 ### Design and UX
@@ -113,6 +114,14 @@ manually with `cp -R skills/<name> .claude/skills/`, or all of them with `./inst
 | [`i18n-setup`](skills/i18n-setup/SKILL.md) | A second language: locale routing, message files, ICU plurals, formatting, language switcher |
 | [`seo-metadata`](skills/seo-metadata/SKILL.md) | Public pages: metadata, OG images, sitemap, robots, noindex, hreflang, JSON-LD |
 | [`cms-content`](skills/cms-content/SKILL.md) | Blogs, docs and marketing sites: headless CMS, MDX, previews, editorial workflow |
+
+### Planning and decisions
+
+| Skill | When to use |
+|-------|-------------|
+| [`grill-me`](skills/grill-me/SKILL.md) | "Grill me", a vague idea or plan to stress-test: questions in rounds with recommended answers until it can be committed to; writes no files (adapted from Matt Pocock's skills) |
+| [`grill-with-docs`](skills/grill-with-docs/SKILL.md) | `/grill-with-docs` only: the same interview, plus resolved terms in `docs/glossary.md` and hard decisions as ADRs in `docs/adr/` |
+| [`to-questionnaire`](skills/to-questionnaire/SKILL.md) | `/to-questionnaire` only: a decision blocked on someone else's knowledge becomes a questionnaire for them to fill in |
 
 ### Architecture and features
 
@@ -352,6 +361,9 @@ metadata:
   harmless.
 - A skill can also be invoked explicitly: *"Use the backend-security-auditor skill on app/api."*
   or as a slash command: `/deslop-en README.md`.
+- **`disable-model-invocation: true`** (`grill-with-docs`, `to-questionnaire`): the agent never
+  starts the skill on its own and doesn't even see its description; it runs only when you type
+  its slash command. Used for skills that write files or should start only on purpose.
 - **Language-specific skills** come in sets for English, Czech, German and Ukrainian
   (`ux-writing-en` / `-cs` / `-de` / `-uk`, `deslop-en` / `-cs` / `-de` / `-uk`). Each is
   self-contained, and its description says which language it is for, so the agent picks the
@@ -456,6 +468,7 @@ governed by their own licenses:
 | Impeccable | Paul Bakaus | Apache-2.0 | https://github.com/pbakaus/impeccable |
 | Component registries (Magic UI, Aceternity UI, React Bits, …) | their authors | per registry — see `component-registries` | https://ui.shadcn.com/r/registries.json |
 | Laws of UX (inspiration for `ux-laws`) | Jon Yablonski | website content © the author; the skill is an original wording | https://lawsofux.com |
+| mattpocock/skills (adapted in `grill-me`, `grill-with-docs`, `to-questionnaire`) | Matt Pocock | MIT — notice in each skill's `NOTICE.md` | https://github.com/mattpocock/skills |
 
 Product names and trademarks belong to their respective owners. This project is not
 officially affiliated with Anthropic, Vercel, Google, shadcn or 21st.dev.

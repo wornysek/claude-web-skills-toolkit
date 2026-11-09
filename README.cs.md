@@ -69,7 +69,7 @@ claude-web-skills-toolkit/
 ├── hooks/
 │   ├── slop-secrets-guard.sh      # hook pro Claude Code: blokuje tajné hodnoty, hlásí AI obraty
 │   └── settings.example.json      # registrace hooku pro .claude/settings.json
-└── skills/                        # 40 skillů, každý ve složce se SKILL.md (viz tabulky níže)
+└── skills/                        # 43 skillů, každý ve složce se SKILL.md (viz tabulky níže)
     ├── a11y-auditor/
     ├── ai-features/
     └── …
@@ -85,7 +85,8 @@ obsahují zdroj, autora, licenci, přesný postup instalace, JSON konfiguraci a 
 
 ## Tabulka skillů a nástrojů
 
-Všechny vlastní skilly jsou od claude-web-skills-toolkit pod licencí MIT. Jednotlivě je
+Všechny vlastní skilly jsou od claude-web-skills-toolkit pod licencí MIT (skilly pro plánování
+jsou upravené podle skillů Matta Pococka pod MIT, viz jejich `NOTICE.md`). Jednotlivě je
 nainstalujete příkazem `cp -R skills/<název> .claude/skills/`, všechny najednou přes `./install.sh --skills`.
 
 ### Design a UX
@@ -116,6 +117,14 @@ nainstalujete příkazem `cp -R skills/<název> .claude/skills/`, všechny najed
 | [`i18n-setup`](skills/i18n-setup/SKILL.md) | Druhý jazyk: routing podle jazyka, soubory s překlady, ICU plurály, formáty, přepínač jazyka |
 | [`seo-metadata`](skills/seo-metadata/SKILL.md) | Veřejné stránky: metadata, OG obrázky, sitemap, robots, noindex, hreflang, JSON-LD |
 | [`cms-content`](skills/cms-content/SKILL.md) | Blogy, dokumentace a marketingové weby: headless CMS, MDX, náhledy, redakční workflow |
+
+### Plánování a rozhodování
+
+| Skill | Kdy použít |
+|-------|-------------|
+| [`grill-me`](skills/grill-me/SKILL.md) | „Vyzpovídej mě“, nejasný nápad nebo plán k prověření: otázky v kolech s doporučenými odpověďmi, dokud se nedá rozhodnout; nevytváří žádné soubory (podle skillů Matta Pococka) |
+| [`grill-with-docs`](skills/grill-with-docs/SKILL.md) | Jen přes `/grill-with-docs`: stejný rozhovor, navíc vyjasněné pojmy do `docs/glossary.md` a zásadní rozhodnutí jako ADR do `docs/adr/` |
+| [`to-questionnaire`](skills/to-questionnaire/SKILL.md) | Jen přes `/to-questionnaire`: rozhodnutí, které závisí na znalostech někoho jiného, převede na dotazník, který dotyčný vyplní |
 
 ### Architektura a funkce
 
@@ -350,6 +359,9 @@ metadata:
   a pro agenty/nástroje, které s ním umí pracovat. Claude Code ho ignoruje, nevadí mu.
 - Skill lze vyvolat i explicitně: *„Použij skill backend-security-auditor na app/api.“*
   nebo jako slash příkaz: `/deslop-cs README.cs.md`.
+- **`disable-model-invocation: true`** (`grill-with-docs`, `to-questionnaire`): agent skill nikdy
+  nespustí sám a nevidí ani jeho popis; spustí se jen tehdy, když napíšete jeho slash příkaz.
+  Používá se pro skilly, které zapisují soubory nebo se mají spouštět jen záměrně.
 - **Jazykové skilly** jsou pro angličtinu, češtinu, němčinu a ukrajinštinu (`ux-writing-en` /
   `-cs` / `-de` / `-uk`, `deslop-en` / `-cs` / `-de` / `-uk`). Každý je samostatný a jeho popis
   říká, pro jaký jazyk je určený, takže agent vybere ten správný podle jazyka textu. Instrukce
@@ -451,6 +463,7 @@ se vlastními licencemi:
 | Impeccable | Paul Bakaus | Apache-2.0 | https://github.com/pbakaus/impeccable |
 | Registry komponent (Magic UI, Aceternity UI, React Bits, …) | jejich autoři | podle registru — viz `component-registries` | https://ui.shadcn.com/r/registries.json |
 | Laws of UX (inspirace pro `ux-laws`) | Jon Yablonski | obsah webu © autor; skill je vlastní formulace | https://lawsofux.com |
+| mattpocock/skills (upraveno v `grill-me`, `grill-with-docs`, `to-questionnaire`) | Matt Pocock | MIT — oznámení v `NOTICE.md` každého skillu | https://github.com/mattpocock/skills |
 
 Názvy produktů a ochranné známky patří jejich vlastníkům. Tento projekt není oficiálně
 spojen s Anthropic, Vercel, Google, shadcn ani 21st.dev.

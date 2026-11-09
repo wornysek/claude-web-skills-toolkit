@@ -183,8 +183,10 @@ Before / after:
 
 ## 10. Consistency: the glossary
 
-Keep a glossary (in `CLAUDE.md` or `docs/glossary.md`) with the canonical term and the
-synonyms you don't use. Check every new string against it.
+Keep the glossary in `docs/glossary.md`, section **UI wording**: the canonical term and the
+synonyms you don't use, one table per language. Check every new string against it. The same
+file holds the **Domain terms** that `grill-with-docs` records; when a UI word differs from
+the domain term (the domain says *tenant*, the UI says *workspace*), note it in the table.
 
 | Use | Don't use |
 |-----|-----------|

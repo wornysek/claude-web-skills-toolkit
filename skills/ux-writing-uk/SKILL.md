@@ -180,6 +180,8 @@ Success messages and emails:
 
 ## 10. Glossary
 
+Keep it in `docs/glossary.md`, section **UI wording** (`ux-writing-en` section 10).
+
 | Use | Don't use |
 |-----|-----------|
 | увійти / вийти | залогінитися, розлогінитися, «логін» as a verb |

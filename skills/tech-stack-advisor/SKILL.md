@@ -158,7 +158,9 @@ Answer in this shape:
 **Verified:** versions and pricing checked on <date>; unverified: <items>.
 ```
 
-Then write the decision to `docs/adr/0001-tech-stack.md`:
+Then write the decision as an ADR in `docs/adr/` with the next free number (`0001-tech-stack.md`
+in a new project). `grill-with-docs` uses the same format for other decisions; here the
+decision is a table:
 
 ```markdown
 # ADR 0001: Tech stack
